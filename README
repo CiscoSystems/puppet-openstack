@@ -1,0 +1,26 @@
+OpenStack module
+
+This module complements the existig Keystone, Glance, etc. modules.
+
+Its purpose is to provide some simpler classes that will simplify
+deployment of OpenStack. It shifts the thinking from the individual
+components of OpenStack to classes of nodes.
+
+The simplest example is instead of deploying "a node that runs
+nova-compute and nova-network", you deploy a "compute node". Whichever
+components of Nova, Quantum and Glance that requires, will all be pulled
+in.
+
+It currently features two classes:
+
+openstack::all-in-one:
+
+    Installs all of OpenStack ("all" is only Keystone, Glance and Nova
+    for now, but that'll change quite soon) on a single machine. If
+    you're familiar with devstack, this is mostly the same thing, just
+    driven by puppet.
+
+openstack::compute-node:
+
+    An extra compute node that can extend an existing
+    openstack::all-on-one "cloud".
