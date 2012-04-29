@@ -1,11 +1,56 @@
+# = Class: openstack::all-in-one
+# 
+# == Parameters:
+# - mysql_root_password			Password for the mysql"root" user on the database host(s)
+# - mysql_host							Hostname (or IP) for the Mysql server
+# - keystone_db_password		Password for the Keystone db (on the mysql server)
+# - keystone_admin_token		Administration token for Keystone access
+# - glance_db_passwrod			Password for the Glance db (on the mysql server)
+# - glance_servcie_password	Password for access to the Glance service
+# - glance_host							Hostname (or IP) for the Glance server
+# - nova_db_password				Password for the Nova db (on the mysql server)
+# - nova_service_password		Password for access to the Nova service
+# - nova_host								Hostname (or IP) for the Nova server
+# - admin_password					Password for the Admin user
+# - bridge_ip								IP for the nova compute Bridge interface ("inside")
+# - bridge_netmask					Netmask for the Bridge interface
+# - public_ip								IP for the public facing interface ("outside")
+# - admin_ip								IP for administration of the system
+# - internal_ip							IP for loopback
+# - network_manager					Network manager type (VLAN, Flat, FlatDHCP, Quantum)
+# 
+# == Example:
+# 
+# A basic node definition
+#
+# node /nova\.example\.com/ {
+# 	class { "openstack::all-in-one":
+# 	}
+# }
+# 
+# Or a set up with a specific bridge interface, and the host addresses exposed on the external network, likley to allow for adding compute nodes.
+# 
+# node /nova\.example\.com/ {
+# 	class { "openstack::all-in-one":
+# 		$bridge_ip = '192.168.200.1',
+# 		$mysql_host = $ip_address,
+# 		$glance_host = $ip_address,
+# 		$nova_host = $ip_address,
+# 	}
+# }
+# 
+# 
 class openstack::all-in-one(
 	$mysql_root_password = 'UbQuaiwenn2',
+	$mysql_host = 'localhost',
 	$keystone_db_password = 'Peffyuc5',
 	$keystone_admin_token = 'TucMidIvtob2',
 	$glance_db_password = 'oidf73DFE',
 	$glance_service_password = '55kdiRbWE',
+	$glance_host = 'localhost',
 	$nova_db_password = 'gjD4sFJuds',
 	$nova_service_password = 'dk33fWEee',
+	$nova_host = 'localhost',
 	$admin_password = '4dmin',
 	$bridge_ip = '192.168.188.1',
 	$bridge_netmask = '255.255.255.0',
@@ -67,7 +112,7 @@ class openstack::all-in-one(
 		keystone_tenant => 'services',
 		keystone_user => 'glance',
 		keystone_password => $glance_service_password,
-		sql_connection => "mysql://glance:${glance_db_password}@127.0.0.1/glance",
+		sql_connection => "mysql://glance:${glance_db_password}@${mysql_host}/glance",
 		require => [Class[glance::db], Keystone_user_role["glance@services"]]
 	}
 
@@ -108,13 +153,13 @@ class openstack::all-in-one(
 
 	class { nova::db:
 		password => $nova_db_password,
-		host => 'localhost',
+		host => $nova_host,
 	}
 
 	class { nova:
-		sql_connection => "mysql://nova:${nova_db_password}@localhost/nova",
+		sql_connection => "mysql://nova:${nova_db_password}@${mysql_host}/nova",
 		image_service  => 'nova.image.glance.GlanceImageService',
-		glance_api_servers => '127.0.0.1:9292',
+		glance_api_servers => '${glance_host}:9292',
 		network_manager => $network_manager,
 		admin_password => $nova_service_password,
 	}
