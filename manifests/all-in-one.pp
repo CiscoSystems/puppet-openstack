@@ -32,10 +32,10 @@
 # 
 # node /nova\.example\.com/ {
 # 	class { "openstack::all-in-one":
-# 		$bridge_ip = '192.168.200.1',
-# 		$mysql_host = $ip_address,
-# 		$glance_host = $ip_address,
-# 		$nova_host = $ip_address,
+# 		bridge_ip => '192.168.200.1',
+# 		mysql_host => $ip_address,
+# 		glance_host => $ip_address,
+# 		nova_host => $ip_address,
 # 	}
 # }
 # 
