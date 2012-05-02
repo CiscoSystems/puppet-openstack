@@ -94,6 +94,7 @@ class openstack::all-in-one(
 	# Glance
 	class { 'glance::keystone::auth':
 		password => $glance_service_password,
+		address => $public_ip,
 	}
 
 	class { glance::db::mysql:
@@ -124,6 +125,7 @@ class openstack::all-in-one(
 	# Nova
 	class { 'nova::keystone::auth':
 		password => $nova_service_password,
+		public_address => $public_ip,
 	}
 
 	class { nova::rabbitmq: }
