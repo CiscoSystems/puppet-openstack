@@ -157,7 +157,6 @@ class openstack::all-in-one(
 
 	nova::manage::network { "nova-vm-net":
 		network => '192.168.188.0/24',
-		available_ips => '256',
 	}
 
 	class { 'nova::objectstore':
