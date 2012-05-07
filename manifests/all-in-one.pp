@@ -182,11 +182,13 @@ class openstack::all-in-one(
 		enabled => true
 	}
 
+	class { 'nova::vncproxy':
+		host => $public_ip,
+	}
+
 	class { 'nova::compute::libvirt':
 		libvirt_type		 => 'kvm',
 		vncserver_listen => '127.0.0.1',
-#		flat_network_bridge_ip => $bridge_ip,
-#		flat_network_bridge_netmask => $bridge_netmask,
 	}
 
 	class { 'memcached':
