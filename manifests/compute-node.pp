@@ -8,6 +8,11 @@ class openstack::compute-node(
 	$network_manager = 'nova.network.manager.FlatDHCPManager',
 	$cluster_id = 'localzone') {
 
+	# Clear out any settings from nova's config that we didn't put there
+	resources { 'nova_config':
+		purge => true,
+	}
+
 	# MySQL server
 	class { 'mysql::python': }
 
