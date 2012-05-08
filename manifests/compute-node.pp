@@ -19,15 +19,10 @@ class openstack::compute-node(
 		image_service  => 'nova.image.glance.GlanceImageService',
 		glance_api_servers => $glance_api_servers,
 		network_manager => $network_manager,
-		admin_password => $nova_service_password,
 	}
 
 	class { nova::compute:
-		enabled => true }
-
-	class { nova::compute::libvirt:
-		flat_network_bridge_ip => $bridge_ip,
-		flat_network_bridge_netmask => $bridge_netmask,
+		enabled => true
 	}
 
 	@@nova::db::mysql::host_access { $ip:
