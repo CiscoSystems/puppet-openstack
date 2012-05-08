@@ -22,6 +22,8 @@ class openstack::compute-node(
 		rabbit_host => false,
 	}
 
+	class { nova::compute::libvirt: }
+
 	class { nova::compute:
 		enabled => true
 	}
