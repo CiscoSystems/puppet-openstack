@@ -142,6 +142,8 @@ class openstack::all-in-one(
 		host => 'localhost',
 	}
 
+	@@nova_config { "rabbit_host": value => $fqdn }
+
 	$nova_sql_connection = "mysql://nova:${nova_db_password}@${ipaddress}/nova"
 	@@nova_config { "sql_connection": value => $nova_sql_connection }
 
@@ -149,7 +151,8 @@ class openstack::all-in-one(
 		image_service	=> 'nova.image.glance.GlanceImageService',
 		glance_api_servers => '127.0.0.1:9292',
 		network_manager => $network_manager,
-		require => Class[nova::db::mysql]
+		require => Class[nova::db::mysql],
+		rabbit_host => false
 	}
 
 	class { 'nova::api':

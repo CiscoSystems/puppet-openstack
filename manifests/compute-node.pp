@@ -19,6 +19,7 @@ class openstack::compute-node(
 		image_service  => 'nova.image.glance.GlanceImageService',
 		glance_api_servers => $glance_api_servers,
 		network_manager => $network_manager,
+		rabbit_host => false,
 	}
 
 	class { nova::compute:
