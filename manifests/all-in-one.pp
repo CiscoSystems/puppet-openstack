@@ -148,7 +148,7 @@ class openstack::all-in-one(
 
 	@@nova_config { "rabbit_host": value => $fqdn }
 
-	$nova_sql_connection = "mysql://nova:${nova_db_password}@${ipaddress}/nova"
+	$nova_sql_connection = "mysql://nova:${nova_db_password}@${internal_ip}/nova"
 	@@nova_config { "sql_connection": value => $nova_sql_connection }
 
 	class { 'nova':
