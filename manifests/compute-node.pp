@@ -21,10 +21,10 @@ class openstack::compute-node(
 	Nova_config<<| title == "sql_connection" |>>
 
 	class { nova:
-		image_service  => 'nova.image.glance.GlanceImageService',
 		glance_api_servers => $glance_api_servers,
 		network_manager => $network_manager,
 		rabbit_host => false,
+		glance_api_servers => false,
 	}
 
 	class { nova::compute::libvirt: }

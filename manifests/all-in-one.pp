@@ -103,6 +103,8 @@ class openstack::all-in-one(
 		password => $glance_db_password
 	}
 
+	@@nova_config { glance_api_servers: value => "${internal_ip}:9292" }
+
 	class { glance::api:
 		auth_type => 'keystone',
 		auth_host => '127.0.0.1',
@@ -152,11 +154,11 @@ class openstack::all-in-one(
 	@@nova_config { "sql_connection": value => $nova_sql_connection }
 
 	class { 'nova':
-		image_service	=> 'nova.image.glance.GlanceImageService',
 		glance_api_servers => '127.0.0.1:9292',
 		network_manager => $network_manager,
 		require => Class[nova::db::mysql],
-		rabbit_host => false
+		rabbit_host => false,
+		glance_api_servers => false,
 	}
 
 	class { 'nova::api':
