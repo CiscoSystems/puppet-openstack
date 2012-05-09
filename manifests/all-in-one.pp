@@ -154,7 +154,6 @@ class openstack::all-in-one(
 	@@nova_config { "sql_connection": value => $nova_sql_connection }
 
 	class { 'nova':
-		glance_api_servers => '127.0.0.1:9292',
 		network_manager => $network_manager,
 		require => Class[nova::db::mysql],
 		rabbit_host => false,

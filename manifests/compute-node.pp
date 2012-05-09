@@ -4,7 +4,7 @@ class openstack::compute-node(
 	$ip = "${ipaddress_eth0}",
 	$bridge_ip = '192.168.188.1',
 	$bridge_netmask = '255.255.255.0',
-	$glance_api_servers = '127.0.0.1:9292',
+	$glance_api_servers = '127.0.0.1:9292', # ignored!
 	$network_manager = 'nova.network.manager.FlatDHCPManager',
 	$cluster_id = 'localzone') {
 
@@ -21,7 +21,6 @@ class openstack::compute-node(
 	Nova_config<<| title == "sql_connection" |>>
 
 	class { nova:
-		glance_api_servers => $glance_api_servers,
 		network_manager => $network_manager,
 		rabbit_host => false,
 		glance_api_servers => false,
