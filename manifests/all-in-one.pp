@@ -89,7 +89,9 @@ class openstack::all-in-one(
 		password => $admin_password
 	}
 
-	class { 'keystone::endpoint': }
+	class { 'keystone::endpoint':
+		address => $public_ip
+	}
 
 	# Glance
 	class { 'glance::keystone::auth':
@@ -126,6 +128,8 @@ class openstack::all-in-one(
 	class { 'nova::keystone::auth':
 		password => $nova_service_password,
 		public_address => $public_ip,
+		admin_address => $admin_ip,
+		internal_address => $internal_ip
 	}
 
 	class { nova::rabbitmq: }
