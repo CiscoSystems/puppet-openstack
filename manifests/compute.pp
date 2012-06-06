@@ -65,7 +65,8 @@ class openstack::compute(
   $vnc_enabled         = 'true',
   $verbose             = false,
   $manage_volumes      = false,
-  $nova_volume         = 'nova-volumes'
+  $nova_volume         = 'nova-volumes',
+  $prevent_db_sync     = true
 ) {
 
   class { 'nova':
@@ -75,6 +76,7 @@ class openstack::compute(
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_api_servers,
+    prevent_db_sync    => $prevent_db_sync,
     verbose            => $verbose,
   }
 
