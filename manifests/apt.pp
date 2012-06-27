@@ -9,13 +9,13 @@
 # [key] ID of the signing key used in the repository
 # [key_source] A URL for the public key identified by key
 #
-class openstack::apt(
+define openstack::apt(
   $location,
   $release = $lsbdistcodename,
   $repos   = 'main',
   $key,
   $key_source) {
-        apt::source { "cisco_openstack":
+        apt::source { "openstack-${name}":
                 location          => $location,
                 release           => $release,
                 repos             => $repos,
