@@ -5,7 +5,14 @@
 #
 #
 
-require 'puppet'
+begin
+  require 'yaml'
+  require 'puppetlabs_spec_helper/rake_tasks'
+rescue LoadError
+  puts "!!!!!"
+  puts "puppetlabs_spec_helper not found. This may cause some rake tasks to be unavailable."
+  puts "!!!!!"
+end
 
 repo_file = 'other_repos.yaml'
 default_modulepath = '/etc/puppet/modules'
@@ -22,7 +29,7 @@ namespace :modules do
       # I should check to see if the file is there?
       outpath = File.join(modulepath, local)
       output = `git clone #{remote} #{outpath}`
-      Puppet.debug(output)
+      puts output
     end
     branches_to_checkout.each do |local, branch|
       Dir.chdir(File.join(modulepath, local)) do

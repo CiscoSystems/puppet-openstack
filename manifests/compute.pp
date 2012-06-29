@@ -23,6 +23,7 @@
 # [sql_connection] SQL connection information. Optional. Defaults to false
 #   which indicates that exported resources will be used to determine connection
 #   information.
+# [nova_user_password] Nova service password.
 #  [rabbit_host] RabbitMQ host. False indicates it should be collected.
 #    Optional. Defaults to false,
 #  [rabbit_password] RabbitMQ password. Optional. Defaults to  'rabbit_pw',
@@ -55,6 +56,7 @@ class openstack::compute(
   # my address
   # conection information
   $sql_connection      = false,
+  $nova_user_password  = 'nova_pass',
   $rabbit_host         = false,
   $rabbit_password     = 'rabbit_pw',
   $rabbit_user         = 'nova',
@@ -98,7 +100,10 @@ class openstack::compute(
 
     include keystone::python
 
-    nova_config { 'multi_host':   value => 'True'; }
+    nova_config {
+      'multi_host':        value => 'True';
+      'send_arp_for_ha':   value => 'True';
+    }
     if ! $public_interface {
       fail('public_interface must be defined for multi host compute nodes')
     }
@@ -107,12 +112,13 @@ class openstack::compute(
       enabled           => true,
       admin_tenant_name => 'services',
       admin_user        => 'nova',
-      admin_password    => $nova_service_password,
+      admin_password    => $nova_user_password,
     }
   } else {
     $enable_network_service = false
     nova_config {
-      'multi_host':   value => 'False';
+      'multi_host':        value => 'False';
+      'send_arp_for_ha':   value => 'False';
     }
   }
 
