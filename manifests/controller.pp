@@ -43,6 +43,7 @@
 #   There is no specific requirement for these apps to be for monitoring, that's just the defacto purpose.
 #   Each app is defined in two parts, the display name, and the URI
 # [horizon_app_links]     array as in '[ ["Nagios","http://nagios_addr:port/path"],["Ganglia","http://ganglia_addr"] ]'
+# [horizon_top_links]     just like horizon_app_links, but shown in the header
 #
 # [enabled] Whether services should be enabled. This parameter can be used to
 #   implement services in active-passive modes for HA. Optional. Defaults to true.
@@ -89,6 +90,7 @@ class openstack::controller(
   $swift                   = false,
   $quantum                 = false,
   $horizon_app_links       = false,
+  $horizon_top_links       = false,
   $enabled                 = true
 ) {
 
@@ -319,6 +321,7 @@ class openstack::controller(
     swift => $swift,
     quantum => $quantum,
     horizon_app_links => $horizon_app_links,
+    horizon_top_links => $horizon_top_links,
   }
 
 
