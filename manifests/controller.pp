@@ -115,14 +115,16 @@ class openstack::controller(
   ####### DATABASE SETUP ######
 
   # set up mysql server
-  class { 'mysql::server':
-    config_hash => {
-      # the priv grant fails on precise if I set a root password
-      # TODO I should make sure that this works
-      # 'root_password' => $mysql_root_password,
-      'bind_address'  => '0.0.0.0'
-    },
-    enabled => $enabled,
+  if (!defined(Class[mysql::server])) {
+    class { 'mysql::server':
+      config_hash => {
+        # the priv grant fails on precise if I set a root password
+        # TODO I should make sure that this works
+        # 'root_password' => $mysql_root_password,
+        'bind_address'  => '0.0.0.0'
+      },
+      enabled => $enabled,
+    }
   }
   if ($enabled) {
     # set up all openstack databases, users, grants
