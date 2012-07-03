@@ -96,11 +96,13 @@ class openstack::all(
   }
 
   # set up mysql server
-  class { 'mysql::server':
-    config_hash => {
-      # the priv grant fails on precise if I set a root password
-      'root_password' => $mysql_root_password,
-      'bind_address'  => '127.0.0.1'
+  if (!defined(Class[mysql::server])) {
+    class { 'mysql::server':
+      config_hash => {
+        # the priv grant fails on precise if I set a root password
+        'root_password' => $mysql_root_password,
+        'bind_address'  => '127.0.0.1'
+      }
     }
   }
 
