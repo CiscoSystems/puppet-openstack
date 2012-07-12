@@ -11,7 +11,7 @@
 #
 define openstack::apt(
   $location,
-  $release = $lsbdistcodename,
+  $release = $::lsbdistcodename,
   $repos   = 'main',
   $key,
   $key_source) {
@@ -19,7 +19,7 @@ define openstack::apt(
     if ($location =~ /^ppa:/) {
       apt::ppa { "$location":
         release => $release
-      }} -> Package <| tag == "openstack" |>
+      } -> Package <| tag == "openstack" |>
     } else {
       apt::source { "openstack-${name}":
         location          => $location,
