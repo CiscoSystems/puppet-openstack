@@ -37,6 +37,7 @@
 # [cache_server_ip]     local memcached instance ip
 # [cache_server_port]   local memcached instance port
 # [swift]               (bool) is swift installed
+# [glance_on_swift]     (bool) is glance to run on swift or on file
 # [quantum]             (bool) is quantum installed
 #   The next is an array of arrays, that can be used to add call-out links to the dashboard for other apps.
 #   There is no specific requirement for these apps to be for monitoring, that's just the defacto purpose.
@@ -85,6 +86,7 @@ class openstack::controller(
   $cache_server_ip         = '127.0.0.1',
   $cache_server_port       = '11211',
   $swift                   = false,
+  $glance_on_swift	   = false,
   $quantum                 = false,
   $horizon_app_links       = false,
   $horizon_top_links       = false,
@@ -209,8 +211,17 @@ class openstack::controller(
     keystone_password => $glance_user_password,
     enabled           => $enabled,
   }
-  class { 'glance::backend::file': }
-
+  if $glance_on_swift {
+    class { 'glance::backend::swift':
+      swift_store_user => 'glance',
+      swift_store_key => $glance_user_password,
+      swift_store_auth_address => "http://127.0.0.1:35357/v2.0/",
+      swift_store_container => 'glance',
+      swift_store_create_container_on_put => 'true'
+    }
+  } else {
+    class { 'glance::backend::file': }
+  }
   class { 'glance::registry':
     log_verbose       => $verbose,
     log_debug         => $verbose,
