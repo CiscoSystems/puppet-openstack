@@ -213,9 +213,9 @@ class openstack::controller(
   }
   if $glance_on_swift {
     class { 'glance::backend::swift':
-      swift_store_user => 'glance',
-      swift_store_key => $glance_user_password,
-      swift_store_auth_address => "http://127.0.0.1:35357/v2.0/",
+      swift_store_user => 'openstack:admin',
+      swift_store_key => $admin_password,
+      swift_store_auth_address => "http://$internal_address:5000/v2.0/",
       swift_store_container => 'glance',
       swift_store_create_container_on_put => 'true'
     }
