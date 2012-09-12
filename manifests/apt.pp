@@ -13,8 +13,8 @@ define openstack::apt(
   $location,
   $release = $::lsbdistcodename,
   $repos   = 'main',
-  $key,
-  $key_source) {
+  $key = false,
+  $key_source = false) {
 
     if ($location =~ /^ppa:/) {
       apt::ppa { "$location":
