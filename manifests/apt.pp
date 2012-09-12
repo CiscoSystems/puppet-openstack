@@ -13,11 +13,13 @@ define openstack::apt(
   $location,
   $release = $::lsbdistcodename,
   $repos   = 'main',
+  $https_proxy = undef,
   $key = false,
   $key_source = false) {
 
     if ($location =~ /^ppa:/) {
       apt::ppa { "$location":
+	https_proxy       => $https_proxy,
         release => $release
       } -> Package <| tag == "openstack" |>
     } else {
