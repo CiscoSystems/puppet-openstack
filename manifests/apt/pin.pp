@@ -1,6 +1,6 @@
 define openstack::apt::pin($pin_spec,
                            $pin_priority = 990) {
-    if (!isdefined("/etc/apt/preferences.d")) {
+    if (!defined(File["/etc/apt/preferences.d"])) {
         file { "/etc/apt/preferences.d":
             ensure => directory
         }
