@@ -14,13 +14,19 @@ define openstack::apt(
   $release = $::lsbdistcodename,
   $repos   = 'main',
   $https_proxy = undef,
-  $key = false,
-  $key_source = false) {
+  $key = undef,
+  $key_source = undef,
+  $pin_spec = undef) {
 
-    if ($location =~ /^ppa:/) {
+    if ($location =~ /^ppa:(\S+)\/(\S+)/) {
+      $ppa_owner = "$1"
+      $ppa_name = "$2"
       apt::ppa { "$location":
 	https_proxy       => $https_proxy,
         release => $release
+      } -> Package <| tag == "openstack" |>
+      openstack::apt::pin { "pin-${name}":
+        pin_spec => "release o=LP-PPA-${ppa_owner}-${ppa_name}"
       } -> Package <| tag == "openstack" |>
     } else {
       apt::source { "openstack-${name}":
@@ -31,5 +37,10 @@ define openstack::apt(
         key_source        => $key_source,
         include_src       => false,
       } -> Package <| tag == "openstack" |>
+      if ($pin_spec != undef) {
+        openstack::apt::pin { "pin-${name}":
+          pin_spec => $pin_spec
+        } -> Package <| tag == "openstack" |>
+      }
     }
 }
