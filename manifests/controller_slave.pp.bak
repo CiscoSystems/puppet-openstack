@@ -48,7 +48,7 @@
 #
 # [enabled] Whether services should be enabled. This parameter can be used to
 #   implement services in active-passive modes for HA. Optional. Defaults to true.
-class openstack::controller(
+class openstack::controller_slave(
   # my address
   $public_address,
   $virtual_address,
@@ -128,19 +128,19 @@ class openstack::controller(
     # set up all openstack databases, users, grants
     class { 'keystone::db::mysql':
       password => $keystone_db_password,
-      host     => '0.0.0.0',
+      host     => $internal_address,
       allowed_hosts => '%',
     }
     Class['glance::db::mysql'] -> Class['glance::registry']
     class { 'glance::db::mysql':
       password => $glance_db_password,
-      host     => '0.0.0.0',
+      host     => $internal_address,
       allowed_hosts => '%',
     }
     # TODO should I allow all hosts to connect?
     class { 'nova::db::mysql':
       password      => $nova_db_password,
-      host          => '0.0.0.0',
+      host          => $internal_address,
       allowed_hosts => '%',
     }
   }
@@ -152,19 +152,12 @@ class openstack::controller(
     admin_token  => $keystone_admin_token,
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
-    bind_host    => '0.0.0.0',
+    bind_host    => $internal_address,
     log_verbose  => $verbose,
     log_debug    => $verbose,
     catalog_type => 'sql',
     enabled      => $enabled,
   }
-  # set up keystone database
-  # set up the keystone config for mysql
-  class { 'keystone::config::mysql':
-    password => $keystone_db_password,
-    host     => $virtual_address,
-  }
-  
   if ($enabled) {
     # set up keystone admin users
     class { 'keystone::roles::admin':
@@ -206,7 +199,7 @@ class openstack::controller(
     auth_type         => 'keystone',
     auth_host         => $virtual_address,
     auth_port         => '35357',
-    $auth_uri 	      => 'http://${virtual_address}:5000/',
+    auth_uri 	      => 'http://${virtual_address}:5000/',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,

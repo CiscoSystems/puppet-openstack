@@ -48,14 +48,15 @@
 #
 # [enabled] Whether services should be enabled. This parameter can be used to
 #   implement services in active-passive modes for HA. Optional. Defaults to true.
-class openstack::controller(
+class openstack::controller_master(
   # my address
   $public_address,
-  $virtual_address,
+  $virtual_address        = '192.168.220.40',
   $public_interface,
   $private_interface,
   $internal_address,
   $admin_address           = $internal_address,
+  $api_bind_address        = '0.0.0.0',
   # connection information
   $mysql_root_password     = 'sql_pass',
   $admin_email             = 'some_user@some_fake_email_address.foo',
@@ -66,6 +67,7 @@ class openstack::controller(
   $glance_user_password    = 'glance_pass',
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
+  $rabbit_host             = '192.168.220.41',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
   # network configuration
@@ -100,8 +102,8 @@ class openstack::controller(
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    @@nova_config { 'rabbit_host': value => $virtual_address }
-    Nova_config <| title == 'rabbit_host' |>
+    @@nova_config { 'rabbit_host': value => $internal_address }
+    Nova_config <| title == 'rabbit_addresses' |>
     @@nova_config { 'sql_connection': value => $nova_db }
     Nova_config <| title == 'sql_connection' |>
     @@nova_config { 'glance_api_servers': value => $glance_api_servers }
@@ -109,11 +111,11 @@ class openstack::controller(
     @@nova_config { 'novncproxy_base_url': value => "http://${virtual_address}:6080/vnc_auto.html" }
     $sql_connection    = false
     $glance_connection = false
-    $rabbit_connection = false
+    #$rabbit_connection = false
   } else {
     $sql_connection    = $nova_db
     $glance_connection = $glance_api_servers
-    $rabbit_connection = $internal_address
+    #$rabbit_connection = $internal_address
   }
 
   ####### DATABASE SETUP ######
@@ -128,19 +130,19 @@ class openstack::controller(
     # set up all openstack databases, users, grants
     class { 'keystone::db::mysql':
       password => $keystone_db_password,
-      host     => '0.0.0.0',
+      host     => $internal_address,
       allowed_hosts => '%',
     }
     Class['glance::db::mysql'] -> Class['glance::registry']
     class { 'glance::db::mysql':
       password => $glance_db_password,
-      host     => '0.0.0.0',
+      host     => $internal_address,
       allowed_hosts => '%',
     }
     # TODO should I allow all hosts to connect?
     class { 'nova::db::mysql':
       password      => $nova_db_password,
-      host          => '0.0.0.0',
+      host          => $internal_address,
       allowed_hosts => '%',
     }
   }
@@ -152,7 +154,7 @@ class openstack::controller(
     admin_token  => $keystone_admin_token,
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
-    bind_host    => '0.0.0.0',
+    bind_host    => '192.168.220.41',
     log_verbose  => $verbose,
     log_debug    => $verbose,
     catalog_type => 'sql',
@@ -162,7 +164,7 @@ class openstack::controller(
   # set up the keystone config for mysql
   class { 'keystone::config::mysql':
     password => $keystone_db_password,
-    host     => $virtual_address,
+    host     => $internal_address,
   }
   
   if ($enabled) {
@@ -201,12 +203,14 @@ class openstack::controller(
 
 
   class { 'glance::api':
+    bind_host         => '192.168.220.41',
+    registry_host     => $virtual_address,
     log_verbose       => $verbose,
     log_debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => $virtual_address,
     auth_port         => '35357',
-    $auth_uri 	      => 'http://${virtual_address}:5000/',
+    auth_uri 	      => 'http://192.168.220.40:5000/',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
@@ -216,7 +220,7 @@ class openstack::controller(
     class { 'glance::backend::swift':
       swift_store_user => 'openstack:admin',
       swift_store_key => $admin_password,
-      swift_store_auth_address => "http://$virtual_address:5000/v2.0/",
+      swift_store_auth_address => "http://192.168.220.40:5000/v2.0/",
       swift_store_container => 'glance',
       swift_store_create_container_on_put => 'true'
     }
@@ -224,11 +228,13 @@ class openstack::controller(
     class { 'glance::backend::file': }
   }
   class { 'glance::registry':
+    bind_host         => '192.168.220.41',
     log_verbose       => $verbose,
     log_debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => $virtual_address,
     auth_port         => '35357',
+    auth_uri          => 'http://192.168.220.40:5000/',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
@@ -252,7 +258,8 @@ class openstack::controller(
   class { 'nova':
     sql_connection     => $sql_connection,
     # this is false b/c we are exporting
-    rabbit_host        => $rabbit_connection,
+    #rabbit_host        => $rabbit_connection,
+    rabbit_host        => $rabbit_host,
     rabbit_userid      => $rabbit_user,
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
@@ -261,21 +268,17 @@ class openstack::controller(
   }
 
   class { 'nova::api':
-    enabled           => $enabled,
-    # TODO this should be the nova service credentials
-    #admin_tenant_name => 'openstack',
-    #admin_user        => 'admin',
-    #admin_password    => $admin_service_password,
-    admin_tenant_name => 'services',
-    admin_user        => 'nova',
-    admin_password    => $nova_user_password,
-  }
+    enabled         	=> $enabled,
+    admin_tenant_name 	=> 'services',
+    admin_user        	=> 'nova',
+    admin_password    	=> $nova_user_password,
+    auth_host         	=> '192.168.220.40',
+    api_bind_address    => $api_bind_address,
+}
 
   class { [
-    'nova::cert',
     'nova::consoleauth',
     'nova::scheduler',
-    'nova::objectstore',
     'nova::vncproxy'
   ]:
     enabled => $enabled,

@@ -53,11 +53,12 @@ class openstack::compute(
   $network_manager     = 'nova.network.manager.FlatDHCPManager',
   $multi_host          = false,
   $network_config      = {},
+  $api_bind_address    = '0.0.0.0',
   # my address
   # conection information
   $sql_connection      = false,
   $nova_user_password  = 'nova_pass',
-  $rabbit_host         = false,
+  $rabbit_host         = '192.168.220.41',
   $rabbit_password     = 'rabbit_pw',
   $rabbit_user         = 'nova',
   $glance_api_servers  = false,
@@ -68,7 +69,7 @@ class openstack::compute(
   $verbose             = false,
   $manage_volumes      = false,
   $nova_volume         = 'nova-volumes',
-  $prevent_db_sync     = true
+  #$prevent_db_sync     = true
 ) {
 
   class { 'nova':
@@ -78,7 +79,7 @@ class openstack::compute(
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_api_servers,
-    prevent_db_sync    => $prevent_db_sync,
+    #prevent_db_sync    => $prevent_db_sync,
     verbose            => $verbose,
   }
 
@@ -113,6 +114,8 @@ class openstack::compute(
       admin_tenant_name => 'services',
       admin_user        => 'nova',
       admin_password    => $nova_user_password,
+      auth_host         => '192.168.220.40',
+      api_bind_address  => $api_bind_address,
     }
   } else {
     $enable_network_service = false
