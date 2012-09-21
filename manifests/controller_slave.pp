@@ -56,19 +56,20 @@ class openstack::controller_slave(
   $private_interface,
   $internal_address,
   $admin_address           = $internal_address,
-  $bind_host               = $ipaddress_eth0,
   $api_bind_address        = '0.0.0.0',
+  #$service_bind_address    = '127.0.0.1',
   # connection information
   $mysql_root_password     = 'sql_pass',
   $admin_email             = 'some_user@some_fake_email_address.foo',
   $admin_password          = 'ChangeMe',
+  $keystone_host           = '127.0.0.1',
   $keystone_db_password    = 'keystone_pass',
   $keystone_admin_token    = 'keystone_admin_token',
   $glance_db_password      = 'glance_pass',
   $glance_user_password    = 'glance_pass',
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
-  $rabbit_host             = $rabbit_host,
+  $rabbit_host             = '192.168.220.41',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
   # network configuration
@@ -93,8 +94,9 @@ class openstack::controller_slave(
   $swift                   = false,
   $glance_on_swift	   = false,
   $quantum                 = false,
-  $horizon_app_links       = false,
-  $horizon_top_links       = false,
+  $horizon_secret_key      = 'horizon_secret_key',
+  #$horizon_app_links       = false,
+  #$horizon_top_links       = false,
   $enabled                 = true
 ) {
 
@@ -127,26 +129,26 @@ class openstack::controller_slave(
       enabled => $enabled,
     }
   }
-#  if ($enabled) {
-#   # set up all openstack databases, users, grants
-#    class { 'keystone::db::mysql':
-#      password => $keystone_db_password,
-#      host     => $internal_address,
-#      allowed_hosts => '%',
-#    }
-#    Class['glance::db::mysql'] -> Class['glance::registry']
-#    class { 'glance::db::mysql':
-#      password => $glance_db_password,
-#      host     => $internal_address,
-#      allowed_hosts => '%',
-#    }
-#    # TODO should I allow all hosts to connect?
-#    class { 'nova::db::mysql':
-#      password      => $nova_db_password,
-#      host          => $internal_address,
-#      allowed_hosts => '%',
-#    }
-#  }
+  if ($enabled) {
+    # set up all openstack databases, users, grants
+    class { 'keystone::db::mysql':
+      password => $keystone_db_password,
+      host     => $internal_address,
+      allowed_hosts => '%',
+    }
+    Class['glance::db::mysql'] -> Class['glance::registry']
+    class { 'glance::db::mysql':
+      password => $glance_db_password,
+      host     => $internal_address,
+      allowed_hosts => '%',
+    }
+    # TODO should I allow all hosts to connect?
+    class { 'nova::db::mysql':
+      password      => $nova_db_password,
+      host          => $internal_address,
+      allowed_hosts => '%',
+    }
+  }
 
   ####### KEYSTONE ###########
 
@@ -155,7 +157,7 @@ class openstack::controller_slave(
     admin_token  => $keystone_admin_token,
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
-    bind_host    => $bind_host,
+    bind_host    => '192.168.220.42',
     log_verbose  => $verbose,
     log_debug    => $verbose,
     catalog_type => 'sql',
@@ -204,14 +206,14 @@ class openstack::controller_slave(
 
 
   class { 'glance::api':
-    bind_host         => $bind_host,
+    bind_host         => '192.168.220.42',
     registry_host     => $virtual_address,
     log_verbose       => $verbose,
     log_debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => $virtual_address,
     auth_port         => '35357',
-    auth_uri 	      => 'http://${virtual_address}:5000/',
+    auth_uri 	      => 'http://192.168.220.40:5000/',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
@@ -221,7 +223,7 @@ class openstack::controller_slave(
     class { 'glance::backend::swift':
       swift_store_user => 'openstack:admin',
       swift_store_key => $admin_password,
-      swift_store_auth_address => "http://{virtual_address}:5000/v2.0/",
+      swift_store_auth_address => "http://192.168.220.40:5000/v2.0/",
       swift_store_container => 'glance',
       swift_store_create_container_on_put => 'true'
     }
@@ -229,13 +231,13 @@ class openstack::controller_slave(
     class { 'glance::backend::file': }
   }
   class { 'glance::registry':
-    bind_host         => $bind_host,
+    bind_host         => '192.168.220.42',
     log_verbose       => $verbose,
     log_debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => $virtual_address,
     auth_port         => '35357',
-    auth_uri          => 'http://${virtual_address}:5000/',
+    auth_uri          => 'http://192.168.220.40:5000/',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
@@ -269,13 +271,13 @@ class openstack::controller_slave(
   }
 
   class { 'nova::api':
-    enabled           => $enabled,
-    admin_tenant_name => 'services',
-    admin_user        => 'nova',
-    admin_password    => $nova_user_password,
-    auth_host         => $virtual_address,
-    api_bind_address  => $api_bind_address,
-  }
+    enabled         	=> $enabled,
+    admin_tenant_name 	=> 'services',
+    admin_user        	=> 'nova',
+    admin_password    	=> $nova_user_password,
+    auth_host         	=> '192.168.220.40',
+    api_bind_address    => $api_bind_address,
+}
 
   class { [
     'nova::consoleauth',
@@ -329,12 +331,12 @@ class openstack::controller_slave(
   }
 
   class { 'horizon':
-    cache_server_ip => $cache_server_ip,
-    cache_server_port => $cache_server_port,
-    swift => $swift,
-    quantum => $quantum,
-    horizon_app_links => $horizon_app_links,
-    horizon_top_links => $horizon_top_links,
+    secret_key		=> $horizon_secret_key,
+    cache_server_ip   	=> $cache_server_ip,
+    cache_server_port 	=> $cache_server_port,
+    keystone_host     	=> $keystone_host, 
+    swift 		=> $swift,
+    quantum 		=> $quantum,
   }
 
 

@@ -47,6 +47,7 @@
 class openstack::compute(
   $private_interface,
   $internal_address,
+  $virtual_address     = '192.168.220.40',
   # networking config
   $public_interface    = undef,
   $fixed_range         = '10.0.0.0/16',
@@ -56,7 +57,7 @@ class openstack::compute(
   $api_bind_address    = '0.0.0.0',
   # my address
   # conection information
-  $sql_connection      = false,
+  #$sql_connection      = false,
   $nova_user_password  = 'nova_pass',
   $rabbit_host         = '192.168.220.41',
   $rabbit_password     = 'rabbit_pw',
@@ -68,9 +69,31 @@ class openstack::compute(
   $vnc_enabled         = 'true',
   $verbose             = false,
   $manage_volumes      = false,
+  $nova_db_password    = 'nova_pass',
   $nova_volume         = 'nova-volumes',
   #$prevent_db_sync     = true
 ) {
+
+  #$glance_api_servers = "${virtual_address}:9292"
+  $nova_db = "mysql://nova:${nova_db_password}@${virtual_address}/nova"
+
+  if ($export_resources) {
+    # export all of the things that will be needed by the clients
+    #@@nova_config { 'rabbit_host': value => $internal_address }
+    #Nova_config <| title == 'rabbit_addresses' |>
+    @@nova_config { 'sql_connection': value => $sql_connection }
+    Nova_config <| title == 'sql_connection' |>
+    #@@nova_config { 'glance_api_servers': value => $glance_api_servers }
+    #Nova_config <| title == 'glance_api_servers' |>
+    #@@nova_config { 'novncproxy_base_url': value => "http://${virtual_address}:6080/vnc_auto.html" }
+    $sql_connection    = false
+    #$glance_connection = false
+    #$rabbit_connection = false
+  } else {
+    $sql_connection    = $nova_db
+    #$glance_connection = $glance_api_servers
+    #$rabbit_connection = $internal_address
+  }
 
   class { 'nova':
     sql_connection     => $sql_connection,

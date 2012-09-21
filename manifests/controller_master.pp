@@ -61,6 +61,7 @@ class openstack::controller_master(
   $mysql_root_password     = 'sql_pass',
   $admin_email             = 'some_user@some_fake_email_address.foo',
   $admin_password          = 'ChangeMe',
+  $keystone_host           = '127.0.0.1',
   $keystone_db_password    = 'keystone_pass',
   $keystone_admin_token    = 'keystone_admin_token',
   $glance_db_password      = 'glance_pass',
@@ -92,8 +93,9 @@ class openstack::controller_master(
   $swift                   = false,
   $glance_on_swift	   = false,
   $quantum                 = false,
-  $horizon_app_links       = false,
-  $horizon_top_links       = false,
+  $horizon_secret_key      = 'horizon_secret_key',
+  #$horizon_app_links       = false,
+  #$horizon_top_links       = false,
   $enabled                 = true
 ) {
 
@@ -328,12 +330,12 @@ class openstack::controller_master(
   }
 
   class { 'horizon':
-    cache_server_ip => $cache_server_ip,
-    cache_server_port => $cache_server_port,
-    swift => $swift,
-    quantum => $quantum,
-    horizon_app_links => $horizon_app_links,
-    horizon_top_links => $horizon_top_links,
+    secret_key		=> $horizon_secret_key,
+    cache_server_ip   	=> $cache_server_ip,
+    cache_server_port 	=> $cache_server_port,
+    keystone_host     	=> $keystone_host, 
+    swift 		=> $swift,
+    quantum 		=> $quantum,
   }
 
 
