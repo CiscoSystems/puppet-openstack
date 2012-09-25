@@ -159,6 +159,7 @@ class openstack::all(
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
+    sql_connection    => "mysql://glance:${glance_db_password}@127.0.0.1/glance",
   }
 
   # configure glance to store images to disk
