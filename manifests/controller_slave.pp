@@ -90,6 +90,7 @@ class openstack::controller_slave(
   # I do not think that this needs a bridge?
   $verbose                 = false,
   $export_resources        = true,
+  $memcached_servers       = $memcached_servers,
   $cache_server_ip         = '127.0.0.1',
   $cache_server_port       = '11211',
   $swift                   = false,
@@ -269,7 +270,13 @@ class openstack::controller_slave(
     rabbit_addresses   => $rabbit_addresses,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_connection,
+    #memcached_servers  => $memcached_servers,
     verbose            => $verbose,
+  }
+
+  class { 'nova::consoleauth':
+    enabled            => $enabled,
+    memcached_servers  => $memcached_servers,
   }
 
   class { 'nova::api':
@@ -281,9 +288,7 @@ class openstack::controller_slave(
     api_bind_address    => $api_bind_address,
 }
 
-  # Temp disable consolueauth on nodes due to limiation of only 1 running process per deployment.
   class { [
-    #'nova::consoleauth',
     'nova::scheduler',
     'nova::vncproxy'
   ]:
@@ -330,7 +335,7 @@ class openstack::controller_slave(
   # TOOO - what to do about HA for horizon?
 
   class { 'memcached':
-    listen_ip => '127.0.0.1',
+    listen_ip => $cache_server_ip,
   }
 
   class { 'horizon':

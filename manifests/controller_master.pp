@@ -89,6 +89,7 @@ class openstack::controller_master(
   # I do not think that this needs a bridge?
   $verbose                 = false,
   $export_resources        = true,
+  $memcached_servers       = '127.0.0.1',
   $cache_server_ip         = '127.0.0.1',
   $cache_server_port       = '11211',
   $swift                   = false,
@@ -267,6 +268,7 @@ class openstack::controller_master(
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_connection,
+    #memcached_servers  => $memcached_servers,  
     verbose            => $verbose,
   }
 
@@ -277,10 +279,14 @@ class openstack::controller_master(
     admin_password    	=> $nova_user_password,
     auth_host         	=> '192.168.220.40',
     api_bind_address    => $api_bind_address,
-}
+  }
+
+  class { 'nova::consoleauth':
+    enabled            => $enabled,
+    memcached_servers  => $memcached_servers,
+  }
 
   class { [
-    'nova::consoleauth',
     'nova::scheduler',
     'nova::vncproxy'
   ]:
@@ -327,7 +333,7 @@ class openstack::controller_master(
   # TOOO - what to do about HA for horizon?
 
   class { 'memcached':
-    listen_ip => '127.0.0.1',
+    listen_ip => $cache_server_ip,
   }
 
   class { 'horizon':
