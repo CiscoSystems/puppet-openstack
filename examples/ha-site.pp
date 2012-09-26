@@ -1,6 +1,6 @@
+# Copy file to /etc/puppet/manifests/swite.pp
 # This document serves as an example of how to deploy
 # basic single and multi-node openstack environments.
-# Copy file to /etc/puppet/manifests/site.pp
 
 # Load apt prerequisites.  This is only valid on Ubuntu systems
 class { 'apt': }
@@ -35,6 +35,7 @@ $glance_on_swift         = 'true'
 $rabbit_password         = 'guest'
 $rabbit_user             = 'guest'
 $rabbit_addresses        = ['192.168.220.41','192.168.220.42','192.168.220.43']
+$memcached_servers       = ['192.168.220.41:11211,192.168.220.42:11211,192.168.220.43:11211']
 $fixed_network_range     = '10.0.0.0/24'
 $floating_ip_range       = '192.168.220.96/27'
 # switch this to true to have all service log at verbose
@@ -138,6 +139,8 @@ node /control01/ inherits base {
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
     horizon_secret_key	    => $horizon_secret_key,
+    memcached_servers       => $memcached_servers,
+    cache_server_ip         => $ipaddress_eth0,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
     rabbit_addresses        => $rabbit_addresses,
@@ -158,6 +161,10 @@ node /control01/ inherits base {
     password => $swift_user_password,
     address  => $swift_proxy_address,
   }
+
+  #Needed to address a nova-consoleauth limitation for HA - bug has been filed
+  class { 'nova::consoleauth::ha_patch': }
+
 }
 
 node /control0[2-3]/ inherits base {
@@ -194,6 +201,8 @@ node /control0[2-3]/ inherits base {
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
     horizon_secret_key      => $horizon_secret_key,
+    memcached_servers       => $memcached_servers,
+    cache_server_ip         => $ipaddress_eth0,   
     rabbit_addresses        => $rabbit_addresses,         
     #rabbit_host             => $controller_node_primary,
     rabbit_password         => $rabbit_password,
@@ -209,9 +218,13 @@ node /control0[2-3]/ inherits base {
     keystone_admin_token => $keystone_admin_token,
     controller_node      => $controller_node_internal,
   }
+
+  #Needed to address a nova-consoleauth limitation for HA - bug has been filed
+  class { 'nova::consoleauth::ha_patch': }
+
 }
 
-node /compute01/ inherits base {
+node /COMPUTE_NODES/ inherits base {
 
   #Needed to address a short term failure in nova-volume management - bug has been filed
   class { 'nova::compute::file_hack': }
@@ -238,41 +251,6 @@ node /compute01/ inherits base {
     rabbit_addresses    => $rabbit_addresses,
     glance_api_servers => "192.168.220.40:9292",
     api_bind_address   => $ipaddress_eth0,    
-    vncproxy_host      => $controller_node_address,
-    vnc_enabled        => 'true',
-    verbose            => $verbose,
-    manage_volumes     => true,
-    nova_volume        => 'nova-volumes',
-  }
-}
-
-node /compute03/ inherits base {
-
-  #Needed to address a short term failure in nova-volume management - bug has been filed
-  class { 'nova::compute::file_hack': }
-
-  class { 'openstack::auth_file':
-    admin_password       => $admin_password,
-    keystone_admin_token => $keystone_admin_token,
-    controller_node      => $controller_node_internal,
-  }
-
-  class { 'openstack::compute':
-    public_interface   => $public_interface,
-    private_interface  => $private_interface,
-    internal_address   => $ipaddress_eth0,
-    libvirt_type       => 'kvm',
-    fixed_range        => $fixed_network_range,
-    network_manager    => 'nova.network.manager.FlatDHCPManager',
-    multi_host         => $multi_host,
-    #sql_connection     => $sql_connection,
-    nova_user_password => $nova_user_password,
-    #rabbit_host        => $controller_node_primary,
-    rabbit_password    => $rabbit_password,
-    rabbit_user        => $rabbit_user,
-    rabbit_addresses   => $rabbit_addresses,
-    glance_api_servers => "192.168.220.40:9292",
-    api_bind_address   => $ipaddress_eth0,
     vncproxy_host      => $controller_node_address,
     vnc_enabled        => 'true',
     verbose            => $verbose,

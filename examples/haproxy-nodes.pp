@@ -1,7 +1,7 @@
-# This file is used to define dedicated HAproxy nodes for load-balancing 3 OpenStack Controller Nodes
 # Copy file to /etc/puppet/manifests/haproxy-nodes.pp
+# This file is used to define dedicated HAproxy nodes for load-balancing 3 OpenStack Controller Nodes
 
-node /swiftproxy01/ inherits base {
+node /PROXYNODE01/ inherits base {
 
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
@@ -147,19 +147,29 @@ node /swiftproxy01/ inherits base {
    }
  }
 
- # Secondary and tertiary node definitions were removed since only one nova-consolauth process can run.
  haproxy::config { 'novnc_cluster':
     order                       => '31',
     virtual_ip                  => $controller_node_address,
     virtual_ip_port             => ['6080'],
     haproxy_config_options      => {'option'    => ['tcpka', 'tcplog'],
                                     'balance'   => 'source',
-				    'server'  => ["${controller_hostname_primary} ${controller_node_primary}:6080 check inter 2000 rise 2 fall 5"],
+                                    'server'  => ["${controller_hostname_primary} ${controller_node_primary}:6080 check inter 2000 rise 2 fall 5", "${controller_hostname_secondary} ${controller_node_secondary}:6080 check inter 2000 rise 2 fall 5","${controller_hostname_tertiary} ${controller_node_tertiary}:6080 check inter 2000 rise 2 fall 5"],
    }
  }
+
+ haproxy::config { 'memcached_cluster':
+   order                       => '32',
+   virtual_ip                  => $controller_node_address,
+   virtual_ip_port             => ['11211'],
+   haproxy_config_options      => {'option'    => ['tcpka', 'tcplog'],
+                                   'balance'   => 'source',
+                                   'server'  => ["${controller_hostname_primary} ${controller_node_primary}:11211 check inter 2000 rise 2 fall 5", "${controller_hostname_secondary} ${controller_node_secondary}:11211 check inter 2000 rise 2 fall 5","${controller_hostname_tertiary} ${controller_node_tertiary}:11211 check inter 2000 rise 2 fall 5"],
+  }
+ }
+
 }
 
-node /swiftproxy02/ inherits base {
+node /PROXYNODE02/ inherits base {
 
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
@@ -311,8 +321,19 @@ node /swiftproxy02/ inherits base {
     virtual_ip_port             => ['6080'],
     haproxy_config_options      => {'option'    => ['tcpka', 'tcplog'],
                                     'balance'   => 'source',
-				    'server'  => ["${controller_hostname_primary} ${controller_node_primary}:6080 check inter 2000 rise 2 fall 5"],
+                                    'server'  => ["${controller_hostname_primary} ${controller_node_primary}:6080 check inter 2000 rise 2 fall 5", "${controller_hostname_secondary} ${controller_node_secondary}:6080 check inter 2000 rise 2 fall 5","${controller_hostname_tertiary} ${controller_node_tertiary}:6080 check inter 2000 rise 2 fall 5"],
    }
  }
+
+ haproxy::config { 'memcached_cluster':
+   order                       => '32',
+   virtual_ip                  => $controller_node_address,
+   virtual_ip_port             => ['11211'],
+   haproxy_config_options      => {'option'    => ['tcpka', 'tcplog'],
+                                   'balance'   => 'source',
+                                   'server'  => ["${controller_hostname_primary} ${controller_node_primary}:11211 check inter 2000 rise 2 fall 5", "${controller_hostname_secondary} ${controller_node_secondary}:11211 check inter 2000 rise 2 fall 5","${controller_hostname_tertiary} ${controller_node_tertiary}:11211 check inter 2000 rise 2 fall 5"],
+  }
+ }
+
 }
 
