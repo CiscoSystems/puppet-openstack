@@ -69,9 +69,10 @@ class openstack::controller_slave(
   $glance_user_password    = 'glance_pass',
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
-  $rabbit_host             = '192.168.220.41',
+  #$rabbit_host             = '192.168.220.41',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
+  $rabbit_addresses,
   # network configuration
   # this assumes that it is a flat network manager
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
@@ -133,19 +134,19 @@ class openstack::controller_slave(
     # set up all openstack databases, users, grants
     class { 'keystone::db::mysql':
       password => $keystone_db_password,
-      host     => $internal_address,
+      host     => $virtual_address,
       allowed_hosts => '%',
     }
     Class['glance::db::mysql'] -> Class['glance::registry']
     class { 'glance::db::mysql':
       password => $glance_db_password,
-      host     => $internal_address,
+      host     => $virtual_address,
       allowed_hosts => '%',
     }
     # TODO should I allow all hosts to connect?
     class { 'nova::db::mysql':
       password      => $nova_db_password,
-      host          => $internal_address,
+      host          => $virtual_address,
       allowed_hosts => '%',
     }
   }
@@ -157,7 +158,7 @@ class openstack::controller_slave(
     admin_token  => $keystone_admin_token,
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
-    bind_host    => '192.168.220.42',
+    bind_host    => $internal_address,
     log_verbose  => $verbose,
     log_debug    => $verbose,
     catalog_type => 'sql',
@@ -167,7 +168,7 @@ class openstack::controller_slave(
   # set up the keystone config for mysql
   class { 'keystone::config::mysql':
     password => $keystone_db_password,
-    host     => $internal_address,
+    host     => $virtual_address,
   }
   
   if ($enabled) {
@@ -206,14 +207,14 @@ class openstack::controller_slave(
 
 
   class { 'glance::api':
-    bind_host         => '192.168.220.42',
+    bind_host         => $internal_address,
     registry_host     => $virtual_address,
     log_verbose       => $verbose,
     log_debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => $virtual_address,
     auth_port         => '35357',
-    auth_uri 	      => 'http://192.168.220.40:5000/',
+    auth_protocol     => 'http',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
@@ -223,7 +224,7 @@ class openstack::controller_slave(
     class { 'glance::backend::swift':
       swift_store_user => 'openstack:admin',
       swift_store_key => $admin_password,
-      swift_store_auth_address => "http://192.168.220.40:5000/v2.0/",
+      swift_store_auth_address => "http://${virtual_address}:5000/v2.0/",
       swift_store_container => 'glance',
       swift_store_create_container_on_put => 'true'
     }
@@ -231,13 +232,13 @@ class openstack::controller_slave(
     class { 'glance::backend::file': }
   }
   class { 'glance::registry':
-    bind_host         => '192.168.220.42',
+    bind_host         => $internal_address,
     log_verbose       => $verbose,
     log_debug         => $verbose,
     auth_type         => 'keystone',
+    auth_protocol     => 'http',
     auth_host         => $virtual_address,
     auth_port         => '35357',
-    auth_uri          => 'http://192.168.220.40:5000/',
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
@@ -262,9 +263,10 @@ class openstack::controller_slave(
     sql_connection     => $sql_connection,
     # this is false b/c we are exporting
     #rabbit_host        => $rabbit_connection,
-    rabbit_host        => $rabbit_host,
+    #rabbit_host        => $rabbit_host,
     rabbit_userid      => $rabbit_user,
     rabbit_password    => $rabbit_password,
+    rabbit_addresses   => $rabbit_addresses,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_connection,
     verbose            => $verbose,
@@ -275,12 +277,13 @@ class openstack::controller_slave(
     admin_tenant_name 	=> 'services',
     admin_user        	=> 'nova',
     admin_password    	=> $nova_user_password,
-    auth_host         	=> '192.168.220.40',
+    auth_host         	=> $virtual_address,
     api_bind_address    => $api_bind_address,
 }
 
+  # Temp disable consolueauth on nodes due to limiation of only 1 running process per deployment.
   class { [
-    'nova::consoleauth',
+    #'nova::consoleauth',
     'nova::scheduler',
     'nova::vncproxy'
   ]:

@@ -59,7 +59,8 @@ class openstack::compute(
   # conection information
   #$sql_connection      = false,
   $nova_user_password  = 'nova_pass',
-  $rabbit_host         = '192.168.220.41',
+  #$rabbit_host         = '192.168.220.41',
+  $rabbit_addresses,
   $rabbit_password     = 'rabbit_pw',
   $rabbit_user         = 'nova',
   $glance_api_servers  = false,

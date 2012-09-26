@@ -68,9 +68,10 @@ class openstack::controller_master(
   $glance_user_password    = 'glance_pass',
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
-  $rabbit_host             = '192.168.220.41',
+  #$rabbit_host             = '192.168.220.41',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
+  $rabbit_addresses,  
   # network configuration
   # this assumes that it is a flat network manager
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
@@ -132,19 +133,19 @@ class openstack::controller_master(
     # set up all openstack databases, users, grants
     class { 'keystone::db::mysql':
       password => $keystone_db_password,
-      host     => $internal_address,
+      host     => $virtual_address,
       allowed_hosts => '%',
     }
     Class['glance::db::mysql'] -> Class['glance::registry']
     class { 'glance::db::mysql':
       password => $glance_db_password,
-      host     => $internal_address,
+      host     => $virtual_address,
       allowed_hosts => '%',
     }
     # TODO should I allow all hosts to connect?
     class { 'nova::db::mysql':
       password      => $nova_db_password,
-      host          => $internal_address,
+      host          => $virtual_address,
       allowed_hosts => '%',
     }
   }
