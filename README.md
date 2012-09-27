@@ -38,28 +38,24 @@ Step 3: Pull Updated Puppet HA Modules from my Github Repo's:
   
     git clone https://github.com/danehans/puppetlabs-nova.git nova
 
-For the Nova module, change to the rmq-ha branch
+Step 4: For the Nova module, change to the rmq-ha branch
 
     cd nova
 
 Then go:
 
-    git branch -a
-
-...to see what branches you have. One of the lines you see might be: remotes/origin/[NameOfYourBranch]
-
-    git checkout -t -b [NameOfYourBranch] remotes/origin/[NameOfYourBranch]
+    git checkout -t -b rmq-ha remotes/origin/rmq-ha
  
-Step 4: Now that you have pulled all the Puppet HA modules, copy the following .pp files:
+Step 5: Now that you have pulled all the Puppet HA modules, copy the following .pp files:
  
     cp /usr/share/puppet/modules/openstack/ha-site.pp /etc/puppet/manifests/site.pp
     cp /usr/share/puppet/modules/openstack/haproxy-nodes.pp /etc/puppet/manifests/haproxy-nodes.pp
     cp /usr/share/puppet/modules/openstack/cobbler-node.pp /etc/puppet/manifests/cobbler-node.pp
     cp /usr/share/puppet/modules/openstack/swift-nodes.pp /etc/puppet/manifests/swift-nodes.pp
 
-Step 5: Edit the .pp files accordingly.  I still need to document things, but you should be familiar with this process.
+Step 6: Edit the .pp files accordingly.  I still need to document things, but you should be familiar with this process.
 
-Step 6: Deploy your nodes in the following order:
+Step 7: Deploy your nodes in the following order:
 
  A. Build Node
  B. HAproxy Nodes
