@@ -57,14 +57,23 @@ Step 6: Edit the .pp files accordingly.  I still need to document things, but yo
 
 Step 7: Deploy your nodes in the following order:
 
- A. Build Node
- B. HAproxy Nodes
- C. Swift Storage Nodes
- D. Swift Proxy Nodes
- E. Controller 1
- F. Compute Nodes
- G. Test to make sure environment is functional before introducing additional Controller Nodes.
- H. Controller Node 2 and 3
+  A. Build Node
+ 
+  B. HAproxy Nodes
+  Note: Make sure the haproxy/keepalived services are running and the config files look good before proceeding.
+ 
+  C. Swift Storage Nodes
+  Note: The drives should be zero'ed out if you are rebuilding the swift storage nodes.  Use clean-disk.pp from Cisco repo.
+ 
+  D. Swift Proxy Nodes
+ 
+  E. Controller 1
+  
+  F. Compute Nodes
+  
+  G. Test to make sure environment is functional before introducing additional Controller Nodes.
+  
+  H. Controller Node 2 and 3
  
 Step 7: Have a beer... you deserve it! 
  
