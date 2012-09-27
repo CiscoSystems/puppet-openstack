@@ -59,6 +59,16 @@ Step 4: Now that you have pulled all the Puppet HA modules, copy the following .
 
 Step 5: Edit the .pp files accordingly.  I still need to document things, but you should be familiar with this process.
 
-  
+Step 6: Deploy your nodes in the following order:
+
+ A. Build Node
+ B. HAproxy Nodes
+ C. Swift Storage Nodes
+ D. Swift Proxy Nodes
+ E. Controller 1
+ F. Compute Nodes
+ G. Test to make sure environment is functional before introducing additional Controller Nodes.
+ H. Controller Node 2 and 3
  
+Step 7: Have a beer... you deserve it! 
  
