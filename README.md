@@ -48,10 +48,10 @@ Then go:
  
 Step 5: Now that you have pulled all the Puppet HA modules, copy the following .pp files:
  
-    cp /usr/share/puppet/modules/openstack/ha-site.pp /etc/puppet/manifests/site.pp
-    cp /usr/share/puppet/modules/openstack/haproxy-nodes.pp /etc/puppet/manifests/haproxy-nodes.pp
-    cp /usr/share/puppet/modules/openstack/cobbler-node.pp /etc/puppet/manifests/cobbler-node.pp
-    cp /usr/share/puppet/modules/openstack/swift-nodes.pp /etc/puppet/manifests/swift-nodes.pp
+    cp /usr/share/puppet/modules/openstack/examples/ha-site.pp /etc/puppet/manifests/site.pp    
+    cp /usr/share/puppet/modules/openstack/examples/haproxy-nodes.pp /etc/puppet/manifests/haproxy-nodes.pp
+    cp /usr/share/puppet/modules/openstack/examples/cobbler-node.pp /etc/puppet/manifests/cobbler-node.pp
+    cp /usr/share/puppet/modules/openstack/examples/swift-nodes.pp /etc/puppet/manifests/swift-nodes.pp
 
 Step 6: Edit the .pp files accordingly.  I still need to document things, but you should be familiar with this process.
 
