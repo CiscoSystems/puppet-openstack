@@ -103,7 +103,7 @@ class openstack::controller_slave(
 ) {
 
   $glance_api_servers = "${virtual_address}:9292"
-  $nova_db = "mysql://nova:${nova_db_password}@${virtual_address}/nova"
+  $nova_db = "mysql://nova:${nova_db_password}@${internal_address}/nova"
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
