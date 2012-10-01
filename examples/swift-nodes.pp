@@ -1,4 +1,4 @@
-# Copy file to /etc/puppet/manifests/swift-nodes.pp
+#
 # Example file for building out a multi-node environment
 #
 # This example creates nodes of the following roles:
@@ -27,12 +27,10 @@
 #$admin_password       = 'admin_password'
 
 # swift specific configurations
-$swift_user_password  = 'swift_pass'
-$swift_shared_secret  = 'Gdr8ny7YyWqy2'
-$swift_local_net_ip   = $ipaddress_eth0
-
-#$swift_proxy_address    = '192.168.200.50'
-
+$swift_user_password     = 'swift_pass'
+$swift_shared_secret     = 'Gdr8ny7YyWqy2'
+$swift_local_net_ip      = $ipaddress_eth0
+$swift_memcache_servers  = ['192.168.220.52:11211,192.168.220.53:11211']
 
 # configurations that need to be applied to all swift nodes
 node swift_base inherits base  {
@@ -92,7 +90,6 @@ class swift-ucs-disk {
 	owner => 'swift',
 	group => 'swift',
   }
-
 
   swift::storage::disk { 'sdb':
     device => "sdb",
@@ -242,7 +239,7 @@ node /compute02/ inherits swift_base {
   package { 'curl': ensure => present }
 
   class { 'memcached':
-    listen_ip => '127.0.0.1',
+    listen_ip => $swift_local_net_ip,
   }
 
   # specify swift proxy and all of its middlewares
@@ -268,9 +265,14 @@ node /compute02/ inherits swift_base {
   class { [
     'swift::proxy::catch_errors',
     'swift::proxy::healthcheck',
-    'swift::proxy::cache',
+    #'swift::proxy::cache',
     'swift::proxy::swift3',
   ]: }
+  
+  class { 'swift::proxy::cache':
+    memcache_servers  	   => $swift_memcache_servers,   
+  }
+
   class { 'swift::proxy::ratelimit':
     clock_accuracy         => 1000,
     max_sleep_time_seconds => 60,

@@ -1,7 +1,6 @@
-# Copy file to /etc/puppet/manifests/haproxy-nodes.pp
 # This file is used to define dedicated HAproxy nodes for load-balancing 3 OpenStack Controller Nodes
 
-node /PROXYNODE01/ inherits base {
+node /swiftproxy01/ inherits base {
 
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
@@ -11,6 +10,13 @@ node /PROXYNODE01/ inherits base {
    virtual_ips       => "${controller_node_address} dev eth0",
    state             => 'MASTER',
    priority          => '101',
+ }
+
+ keepalived::instance { '51':
+  interface         => 'eth0',
+  virtual_ips       => "${$swiftproxy_vip_address} dev eth0",
+  state             => 'BACKUP',
+  priority          => '100',
  }
 
  class { 'haproxy':
@@ -36,6 +42,7 @@ node /PROXYNODE01/ inherits base {
                                  'maxconn' => '4096'},
   }
 
+ #Add to galera haproxy config option sever 'mysql-check user haproxy'
  haproxy::config { 'galera':
     order                  	=> '20',
     virtual_ip             	=> $controller_node_address,
@@ -129,11 +136,11 @@ node /PROXYNODE01/ inherits base {
 
  haproxy::config { 'swift_proxy_cluster':
     order                       => '29',
-    virtual_ip                  => $controller_node_address,
+    virtual_ip                  => $swiftproxy_vip_address,
     virtual_ip_port             => ['8080'],
-    haproxy_config_options      => {'option'    => ['tcpka', 'httpchk', 'tcplog'],
+    haproxy_config_options      => {'option'    => ['tcpka', 'tcplog'],
                                     'balance'   => 'source',
-				    'server'  => ["${controller_hostname_primary} ${controller_node_primary}:8080 check inter 2000 rise 2 fall 5", "${controller_hostname_secondary} ${controller_node_secondary}:8080 check inter 2000 rise 2 fall 5","${controller_hostname_tertiary} ${controller_node_tertiary}:8080 check inter 2000 rise 2 fall 5"],
+				    'server'  => ["${swiftproxy_hostname_primary} ${swiftproxy_ip_primary}:8080 check inter 2000 rise 2 fall 5", "${swiftproxy_hostname_secondary} ${swiftproxy_ip_secondary}:8080 check inter 2000 rise 2 fall 5",],
    }
  }
  
@@ -169,7 +176,7 @@ node /PROXYNODE01/ inherits base {
 
 }
 
-node /PROXYNODE02/ inherits base {
+node /swiftproxy02/ inherits base {
 
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
@@ -179,6 +186,13 @@ node /PROXYNODE02/ inherits base {
    virtual_ips       => "${controller_node_address} dev eth0",
    state             => 'BACKUP',
    priority          => '100',
+ }
+
+ keepalived::instance { '51':
+  interface         => 'eth0',
+  virtual_ips       => "${$swiftproxy_vip_address} dev eth0",
+  state             => 'MASTER',
+  priority          => '101',
  }
 
  class { 'haproxy':
@@ -204,6 +218,7 @@ node /PROXYNODE02/ inherits base {
                                  'maxconn' => '4096'},
   }
 
+ #Add to galera haproxy config option sever 'mysql-check user haproxy'
  haproxy::config { 'galera':
     order                  	=> '20',
     virtual_ip             	=> $controller_node_address,
@@ -297,11 +312,11 @@ node /PROXYNODE02/ inherits base {
 
  haproxy::config { 'swift_proxy_cluster':
     order                       => '29',
-    virtual_ip                  => $controller_node_address,
+    virtual_ip                  => $swiftproxy_vip_address,
     virtual_ip_port             => ['8080'],
-    haproxy_config_options      => {'option'    => ['tcpka', 'httpchk', 'tcplog'],
+    haproxy_config_options      => {'option'    => ['tcpka', 'tcplog'],
                                     'balance'   => 'source',
-				    'server'  => ["${controller_hostname_primary} ${controller_node_primary}:8080 check inter 2000 rise 2 fall 5", "${controller_hostname_secondary} ${controller_node_secondary}:8080 check inter 2000 rise 2 fall 5","${controller_hostname_tertiary} ${controller_node_tertiary}:8080 check inter 2000 rise 2 fall 5"],
+                                    'server'  => ["${swiftproxy_hostname_primary} ${swiftproxy_ip_primary}:8080 check inter 2000 rise 2 fall 5", "${swiftproxy_hostname_secondary} ${swiftproxy_ip_secondary}:8080 check inter 2000 rise 2 fall 5",],
    }
  }
  
