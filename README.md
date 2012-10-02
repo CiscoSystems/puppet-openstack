@@ -18,6 +18,8 @@ Step 2: Backup the standard puppet modules that are included in the Cisco OpenSt
   
     mv /usr/share/puppet/modules/horizon /usr/share/puppet/modules/horizon.orig
 
+    mv /usr/share/puppet/modules/mysql /usr/share/puppet/modules/mysql.orig
+
 Step 3: Pull Updated Puppet HA Modules from my Github Repo's:
 
     cd /usr/share/puppet/module
@@ -36,6 +38,8 @@ Step 3: Pull Updated Puppet HA Modules from my Github Repo's:
   
     git clone https://github.com/danehans/puppetlabs-horizon.git horizon
   
+    git clone https://github.com/danehans/puppetlabs-mysql.git mysql
+
     git clone https://github.com/danehans/puppetlabs-nova.git nova
 
 Step 4: For the Nova module, change to the rmq-ha branch
@@ -57,23 +61,21 @@ Step 6: Edit the .pp files accordingly.  I still need to document things, but yo
 
 Step 7: Deploy your nodes in the following order:
 
-  A. Build Node
- 
-  B. HAproxy Nodes
+  A. HAproxy Nodes
   Note: Make sure the haproxy/keepalived services are running and the config files look good before proceeding.
  
-  C. Swift Storage Nodes
+  B. Swift Storage Nodes
   Note: The drives should be zero'ed out if you are rebuilding the swift storage nodes.  Use clean-disk.pp from Cisco repo.
  
-  D. Swift Proxy Nodes
+  C. Swift Proxy Nodes
  
-  E. Controller 1
+  D. Controller 1
   
-  F. Compute Nodes
+  E. Compute Nodes
   
-  G. Test to make sure environment is functional before introducing additional Controller Nodes.
+  F. Test to make sure environment is functional before introducing additional Controller Nodes.
   
-  H. Controller Node 2 and 3
+  G. Controller Node 2 and 3
  
 Step 7: Have a beer... you deserve it! 
  
