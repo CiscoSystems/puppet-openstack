@@ -47,7 +47,7 @@
 class openstack::compute(
   $private_interface,
   $internal_address,
-  $virtual_address     = '192.168.220.40',
+  $virtual_address     = $virtual_address,
   # networking config
   $public_interface    = undef,
   $fixed_range         = '10.0.0.0/16',
@@ -138,7 +138,7 @@ class openstack::compute(
       admin_tenant_name => 'services',
       admin_user        => 'nova',
       admin_password    => $nova_user_password,
-      auth_host         => '192.168.220.40',
+      auth_host         => $virtual_address,
       api_bind_address  => $api_bind_address,
     }
   } else {
