@@ -243,7 +243,7 @@ class openstack::controller(
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
-    sql_connection    => "mysql://glance:${glance_db_password}@${internal_address}/glance",
+    sql_connection    => "mysql://glance:${glance_db_password}@${virtual_address}/glance",
     enabled           => $enabled,
   }
 
