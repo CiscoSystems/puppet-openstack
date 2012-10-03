@@ -71,6 +71,7 @@ Step 7: Deploy your nodes in the following order:
  
   D. Controller 1
   Note: You must ensure that the HAproxy Virtual IP address for the Controller cluster is working or your puppet run will fail.
+  
   E. Compute Nodes
   
   F. Test to make sure environment is functional before introducing additional Controller Nodes.
