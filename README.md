@@ -22,7 +22,7 @@ Step 2: Backup the standard puppet modules that are included in the Cisco OpenSt
 
 Step 3: Pull Updated Puppet HA Modules from my Github Repo's:
 
-    cd /usr/share/puppet/module
+    cd /usr/share/puppet/modules
   
     git clone https://github.com/danehans/puppet-openstack.git openstack
   
