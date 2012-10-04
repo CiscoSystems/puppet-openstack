@@ -59,7 +59,7 @@ Step 5: Now that you have pulled all the Puppet HA modules, copy the following .
 
 Step 6: Edit the .pp files accordingly.  I still need to document things, but you should be familiar with this process.
 
-Step 7: Deploy your nodes in the following order:
+Step 7: Deploy your nodes in the following order.  For the time being, you need to perform multiple puppet runs for most nodes to deploy properly.
 
   A. HAproxy Nodes
   Note: Make sure the haproxy/keepalived services are running and the config files look good before proceeding.
