@@ -1,12 +1,12 @@
-I have a functional OpenStack HA cluster.  I still need to perform additional testing, rebuilds, and create documentation.  The example is based on 3 Controller Nodes, 2 Compute Nodes, 1 Swift Proxy Node, 3 Swift Storage Nodes, and 2 HAproxy Nodes.
+I have a functional OpenStack HA cluster.  I still need to perform additional testing, rebuilds, and create documentation.  The example is based on 3 Controller Nodes, 2 Compute Nodes, 2 Swift Proxy Nodes, 3 Swift Storage Nodes, and 2 HAproxy Nodes.
 
 For the time being, you can use my puppet modules:
 
     https://github.com/danehans
 
-Step 1: Use the Build Node Guide to create your Build Node.  
+Step 1: Use the Cisco Build Node Deployment Guide to create your Build Node.  
 
-Step 2: Backup the standard puppet modules that are included in the Cisco OpenStack Packages:
+Step 2: Backup the standard puppet modules that are included in the Cisco OpenStack packages:
 
     mv /usr/share/puppet/modules/openstack /usr/share/puppet/modules/openstack.orig
     
@@ -20,7 +20,7 @@ Step 2: Backup the standard puppet modules that are included in the Cisco OpenSt
 
     mv /usr/share/puppet/modules/mysql /usr/share/puppet/modules/mysql.orig
 
-Step 3: Pull Updated Puppet HA Modules from my Github Repo's:
+Step 3: Pull the updated Puppet HA modules from my Github Repo's:
 
     cd /usr/share/puppet/modules
   
@@ -57,26 +57,24 @@ Step 5: Now that you have pulled all the Puppet HA modules, copy the following .
     cp /usr/share/puppet/modules/openstack/examples/cobbler-node.pp /etc/puppet/manifests/cobbler-node.pp
     cp /usr/share/puppet/modules/openstack/examples/swift-nodes.pp /etc/puppet/manifests/swift-nodes.pp
 
-Step 6: Edit the .pp files accordingly.  I still need to document things, but you should be familiar with this process.
+Step 6: Edit the .pp files accordingly.  I still need to document this step in more detail, but you should be familiar with this process.
 
 Step 7: Deploy your nodes in the following order.  For the time being, you need to perform multiple puppet runs for most nodes to deploy properly.
 
   A. HAproxy Nodes
-  Note: Make sure the haproxy/keepalived services are running and the config files look good before proceeding.
+  Note: Make sure the haproxy/keepalived services are running and the config files look good before proceeding.  It is also very important that you test connectivity to Virtual IP addresses (telnet <vip> <port>).  If the VIP's are not working then the build-out of nodes will fail.
  
   B. Swift Storage Nodes
   Note: The drives should be zero'ed out if you are rebuilding the swift storage nodes.  Use clean-disk.pp from Cisco repo.
  
   C. Swift Proxy Nodes
  
-  D. Controller 1
+  D. Controllers
   Note: You must ensure that the HAproxy Virtual IP address for the Controller cluster is working or your puppet run will fail.
   
   E. Compute Nodes
   
-  F. Test to make sure environment is functional before introducing additional Controller Nodes.
-  
-  G. Controller Node 2 and 3
+  F. Test to make sure environment is functional.
  
 Step 7: Have a beer... you deserve it! 
  
