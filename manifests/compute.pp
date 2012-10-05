@@ -55,15 +55,11 @@ class openstack::compute(
   $multi_host          = false,
   $network_config      = {},
   $api_bind_address    = '0.0.0.0',
-  # my address
-  # conection information
-  #$sql_connection      = false,
   $nova_user_password  = 'nova_pass',
-  #$rabbit_host         = '192.168.220.41',
-  $rabbit_addresses,
+  #$rabbit_addresses,
   $rabbit_password     = 'rabbit_pw',
   $rabbit_user         = 'nova',
-  $glance_api_servers  = false,
+  #$glance_api_servers  = false,
   # nova compute configuration parameters
   $libvirt_type        = 'kvm',
   $vncproxy_host       = false,
@@ -75,25 +71,25 @@ class openstack::compute(
   #$prevent_db_sync     = true
 ) {
 
-  #$glance_api_servers = "${virtual_address}:9292"
+  $glance_api_vip = "${virtual_address}:9292"
   $nova_db = "mysql://nova:${nova_db_password}@${virtual_address}/nova"
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    #@@nova_config { 'rabbit_host': value => $internal_address }
-    #Nova_config <| title == 'rabbit_addresses' |>
+    @@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
+    Nova_config <| title == 'rabbit_addresses' |>
     @@nova_config { 'sql_connection': value => $sql_connection }
     Nova_config <| title == 'sql_connection' |>
-    #@@nova_config { 'glance_api_servers': value => $glance_api_servers }
-    #Nova_config <| title == 'glance_api_servers' |>
-    #@@nova_config { 'novncproxy_base_url': value => "http://${virtual_address}:6080/vnc_auto.html" }
+    @@nova_config { 'glance_api_servers': value => $glance_api_servers }
+    Nova_config <| title == 'glance_api_servers' |>
+    @@nova_config { 'novncproxy_base_url': value => "http://${virtual_address}:6080/vnc_auto.html" }
     $sql_connection    = false
-    #$glance_connection = false
-    #$rabbit_connection = false
+    $glance_api_servers = false
+    $rabbit_addresses = false
   } else {
     $sql_connection    = $nova_db
-    #$glance_connection = $glance_api_servers
-    #$rabbit_connection = $internal_address
+    $glance_api_servers = $glance_api_vip
+    $rabbit_addresses  = $rabbit_addresses
   }
 
   class { 'nova':

@@ -48,16 +48,15 @@
 #
 # [enabled] Whether services should be enabled. This parameter can be used to
 #   implement services in active-passive modes for HA. Optional. Defaults to true.
-class openstack::controller_slave(
+class openstack::controller_old_ha(
   # my address
   $public_address,
   $virtual_address,
   $public_interface,
   $private_interface,
-  $internal_address,
+  $internal_address        = $ipaddress_eth0,
   $admin_address           = $internal_address,
   $api_bind_address        = '0.0.0.0',
-  #$service_bind_address    = '127.0.0.1',
   # connection information
   $mysql_root_password     = 'sql_pass',
   $admin_email             = 'some_user@some_fake_email_address.foo',
@@ -69,10 +68,8 @@ class openstack::controller_slave(
   $glance_user_password    = 'glance_pass',
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
-  #$rabbit_host             = '192.168.220.41',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
-  $rabbit_addresses,
   # network configuration
   # this assumes that it is a flat network manager
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
@@ -107,20 +104,20 @@ class openstack::controller_slave(
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    @@nova_config { 'rabbit_host': value => $internal_address }
+    @@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
     Nova_config <| title == 'rabbit_addresses' |>
-    @@nova_config { 'sql_connection': value => $nova_db }
+    @@nova_config { 'sql_connection': value => $sql_connection }
     Nova_config <| title == 'sql_connection' |>
-    @@nova_config { 'glance_api_servers': value => $glance_api_servers }
+    @@nova_config { 'glance_api_servers': value => $glance_connection }
     Nova_config <| title == 'glance_api_servers' |>
     @@nova_config { 'novncproxy_base_url': value => "http://${virtual_address}:6080/vnc_auto.html" }
     $sql_connection    = false
     $glance_connection = false
-    #$rabbit_connection = false
+    $rabbit_addresses = false
   } else {
     $sql_connection    = $nova_db
     $glance_connection = $glance_api_servers
-    #$rabbit_connection = $internal_address
+    $rabbit_addresses = $rabbit_addresses
   }
 
   ####### DATABASE SETUP ######
