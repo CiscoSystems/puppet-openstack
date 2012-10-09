@@ -14,13 +14,15 @@ Apt::Ppa['ppa:cisco-openstack-mirror/cisco'] -> Package<| title != 'python-softw
 # this section is used to specify global variables that will
 # be used in the deployment of multi and single node openstack
 # environments
-$multi_host		= true
+$multi_host	  	 = true
 # assumes that eth0 is the public interface
 $public_interface        = 'eth0'
 # assumes that eth1 is the interface that will be used for the vm network
 # this configuration assumes this interface is active but does not have an
 # ip address allocated to it.
 $private_interface       = 'eth0.221'
+# openstack::controller class assumes IP_addr_eth0. It is included here to be explicit.
+$internal_address        = $ipaddress_eth0
 # credentials
 $admin_email             = 'root@localhost'
 $admin_password          = 'Cisco123'
@@ -40,7 +42,7 @@ $floating_ip_range       = '192.168.220.96/27'
 # switch this to true to have all service log at verbose
 $verbose                 = 'false'
 # by default it does not enable atomatically adding floating IPs
-$auto_assign_floating_ip = 'false'
+$auto_assign_floating_ip = true
 # Swift addresses:
 $swift_proxy_address    = '192.168.220.60'
 # MySQL Information
@@ -48,6 +50,10 @@ $mysql_root_password    = 'ubuntu'
 $mysql_puppet_password  = 'ubuntu'
 $sql_connection = "mysql://nova:${nova_db_password}@${controller_node_address}/nova"
 $horizon_secret_key     = 'elj1IWiLoWHgcyYxFVLj7cM5rGOOxWl0'
+# RabbitMQ Cluster Configuration
+$cluster_rabbit         = true
+$rabbit_cluster_disk_nodes = ['control01', 'control02', 'control03']
+
 #### end shared variables #################
 
 # multi-controller deployment parameters
@@ -129,9 +135,25 @@ node base {
 
 node /control01/ inherits base {
 
+  # Configure /etc/network/interfaces file
+  class { 'networking::interfaces':
+    node_type           => controller,
+    mgt_is_public       => true,
+    vlan_networking     => true,
+    vlan_interface      => "eth0",
+    mgt_interface       => "eth0",
+    mgt_ip              => "192.168.220.41",
+    mgt_gateway         => "192.168.220.1",
+    flat_vlan           => "221",
+    flat_ip 		=> "10.0.0.251",
+    dns_servers         => "192.168.220.254",
+    dns_search          => "dmz-pod2.lab",
+ }
+
   class { 'galera' :
         cluster_name            => 'openstack',
-	master_ip               => $controller_node_secondary,    
+	# uncomment the master_ip parameter after the 2nd controller is operational. Make sure to recomment if you rebuild the node.
+        #master_ip               => $controller_node_secondary,    
 }
 
   class {'galera::haproxy': }
@@ -141,7 +163,7 @@ node /control01/ inherits base {
     virtual_address         => $controller_node_address,
     public_interface        => $public_interface,
     private_interface       => $private_interface,
-    internal_address        => $ipaddress_eth0,
+    internal_address        => $internal_address,
     floating_range          => $floating_ip_range,
     fixed_range             => $fixed_network_range,
     # by default it does not enable multi-host mode
@@ -150,7 +172,6 @@ node /control01/ inherits base {
     network_manager         => 'nova.network.manager.FlatDHCPManager',
     verbose                 => $verbose,
     auto_assign_floating_ip => $auto_assign_floating_ip,
-    #mysql_root_password     => $mysql_root_password,
     admin_email             => $admin_email,
     admin_password          => $admin_password,
     keystone_host           => $controller_node_address,
@@ -163,13 +184,13 @@ node /control01/ inherits base {
     nova_user_password      => $nova_user_password,
     horizon_secret_key	    => $horizon_secret_key,
     memcached_servers       => $memcached_servers,
-    cache_server_ip         => $ipaddress_eth0,
+    cache_server_ip         => $internal_address,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
-    rabbit_addresses        => $rabbit_addresses,
-    # Req for HA Phase 2 Nova Module
-    api_bind_address        => $ipaddress_eth0,
-    export_resources        => true,
+    cluster_rabbit          => $cluster_rabbit,
+    cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
+    api_bind_address        => $internal_address,
+    export_resources        => false,
     enabled                 => true, #different between active and passive.
   }
 
@@ -179,6 +200,7 @@ node /control01/ inherits base {
     controller_node      => $controller_node_internal,
   }
 
+  # Temp disabled to test manifests
   class { 'swift::keystone::auth':
     auth_name => $swift_user,
     password => $swift_user_password,
@@ -190,20 +212,34 @@ node /control01/ inherits base {
 
 }
 
-node /control0[2-3]/ inherits base {
+node /control02/ inherits base {
+
+  # Configure /etc/network/interfaces file
+  class { 'networking::interfaces':
+    node_type           => controller,
+    mgt_is_public       => true,
+    vlan_networking     => true,
+    vlan_interface      => "eth0",
+    mgt_interface       => "eth0",
+    mgt_ip              => "192.168.220.42",
+    mgt_gateway         => "192.168.220.1",
+    flat_vlan           => "221",
+    flat_ip             => "10.0.0.252",
+    dns_servers         => "192.168.220.254",
+    dns_search          => "dmz-pod2.lab",
+ }
 
   class { 'galera' :
         cluster_name            => 'openstack',
         master_ip               => $controller_node_primary,  
   }
 
-  class { 'openstack::controller_slave':
+  class { 'openstack::controller':
     public_address          => $controller_node_public,
     virtual_address         => $controller_node_address,
     public_interface        => $public_interface,
     private_interface       => $private_interface,
-    internal_address        => $ipaddress_eth0,
-    #service_bind_address    => $ipaddress_eth0,
+    internal_address        => $internal_address,
     floating_range          => $floating_ip_range,
     fixed_range             => $fixed_network_range,
     # by default it does not enable multi-host mode
@@ -212,7 +248,6 @@ node /control0[2-3]/ inherits base {
     network_manager         => 'nova.network.manager.FlatDHCPManager',
     verbose                 => $verbose,
     auto_assign_floating_ip => $auto_assign_floating_ip,
-    #mysql_root_password     => $mysql_root_password,
     admin_email             => $admin_email,
     admin_password          => $admin_password,
     keystone_host           => $controller_node_address,
@@ -225,15 +260,81 @@ node /control0[2-3]/ inherits base {
     nova_user_password      => $nova_user_password,
     horizon_secret_key      => $horizon_secret_key,
     memcached_servers       => $memcached_servers,
-    cache_server_ip         => $ipaddress_eth0,   
-    rabbit_addresses        => $rabbit_addresses,         
-    #rabbit_host             => $controller_node_primary,
+    cache_server_ip         => $internal_address,   
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
-    # Req for HA Phase 2 Nova Module
-    api_bind_address        => $ipaddress_eth0,
+    cluster_rabbit          => $cluster_rabbit,
+    cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
+    api_bind_address        => $internal_address,
     export_resources        => false,
-    enabled                 => true, #different between active and passive.
+  }
+
+  class { 'openstack::auth_file':
+    admin_password       => $admin_password,
+    keystone_admin_token => $keystone_admin_token,
+    controller_node      => $controller_node_internal,
+  }
+
+  #Needed to address a nova-consoleauth limitation for HA - bug has been filed
+  class { 'nova::consoleauth::ha_patch': }
+
+}
+
+node /control03/ inherits base {
+
+  # Configure /etc/network/interfaces file
+  class { 'networking::interfaces':
+    node_type           => controller,
+    mgt_is_public       => true,
+    vlan_networking     => true,
+    vlan_interface      => "eth0",
+    mgt_interface       => "eth0",
+    mgt_ip              => "192.168.220.43",
+    mgt_gateway         => "192.168.220.1",
+    flat_vlan           => "221",
+    flat_ip             => "10.0.0.253",
+    dns_servers         => "192.168.220.254",
+    dns_search          => "dmz-pod2.lab",
+ }
+
+  class { 'galera' :
+        cluster_name            => 'openstack',
+        master_ip               => $controller_node_primary,  
+  }
+
+  class { 'openstack::controller':
+    public_address          => $controller_node_public,
+    virtual_address         => $controller_node_address,
+    public_interface        => $public_interface,
+    private_interface       => $private_interface,
+    internal_address        => $internal_address,
+    floating_range          => $floating_ip_range,
+    fixed_range             => $fixed_network_range,
+    # by default it does not enable multi-host mode
+    multi_host              => $multi_host,
+    # by default is assumes flat dhcp networking mode
+    network_manager         => 'nova.network.manager.FlatDHCPManager',
+    verbose                 => $verbose,
+    auto_assign_floating_ip => $auto_assign_floating_ip,
+    admin_email             => $admin_email,
+    admin_password          => $admin_password,
+    keystone_host           => $controller_node_address,
+    keystone_db_password    => $keystone_db_password,
+    keystone_admin_token    => $keystone_admin_token,
+    glance_db_password      => $glance_db_password,
+    glance_user_password    => $glance_user_password,
+    glance_on_swift         => $glance_on_swift,
+    nova_db_password        => $nova_db_password,
+    nova_user_password      => $nova_user_password,
+    horizon_secret_key      => $horizon_secret_key,
+    memcached_servers       => $memcached_servers,
+    cache_server_ip         => $internal_address,   
+    rabbit_password         => $rabbit_password,
+    rabbit_user             => $rabbit_user,
+    cluster_rabbit          => $cluster_rabbit,
+    cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
+    api_bind_address        => $internal_address,
+    export_resources        => false,
   }
 
   class { 'openstack::auth_file':
@@ -249,6 +350,20 @@ node /control0[2-3]/ inherits base {
 
 node /compute01/ inherits base {
 
+  # Configure /etc/network/interfaces file
+  class { 'networking::interfaces':
+    node_type           => compute,
+    mgt_is_public       => true,
+    vlan_networking     => true,
+    vlan_interface      => "eth0",
+    mgt_interface       => "eth0",
+    mgt_ip              => "192.168.220.51",
+    mgt_gateway         => "192.168.220.1",
+    flat_vlan           => "221",
+    dns_servers         => "192.168.220.254",
+    dns_search          => "dmz-pod2.lab",
+ }
+
   #Needed to address a short term failure in nova-volume management - bug has been filed
   class { 'nova::compute::file_hack': }
 
@@ -261,69 +376,23 @@ node /compute01/ inherits base {
   class { 'openstack::compute':
     public_interface   => $public_interface,
     private_interface  => $private_interface,
-    internal_address   => $ipaddress_eth0,
+    internal_address   => $internal_address,
+    virtual_address    => $controller_node_address,
     libvirt_type       => 'kvm',
     fixed_range        => $fixed_network_range,
     network_manager    => 'nova.network.manager.FlatDHCPManager',
     multi_host         => $multi_host,
-    #sql_connection     => $sql_connection,
     nova_user_password => $nova_user_password,
-    #rabbit_host        => $controller_node_primary,
+    nova_db_password   => $nova_db_password,
     rabbit_password    => $rabbit_password,
     rabbit_user        => $rabbit_user,
-    rabbit_addresses    => $rabbit_addresses,
-    glance_api_servers => "192.168.220.40:9292",
-    api_bind_address   => $ipaddress_eth0,    
+    api_bind_address   => $internal_address,    
     vncproxy_host      => $controller_node_address,
     vnc_enabled        => 'true',
     verbose            => $verbose,
     manage_volumes     => true,
     nova_volume        => 'nova-volumes',
   }
-}
-
-node /compute03/ inherits base {
-
-class { 'net_interfaces':
-  style      => swift-storage,
-  ip         => "1.1.1.10",
-  gateway    => "1.1.1.1",
-  broadcast  => "1.1.1.255",
-}
-
-#hosts { compute03: host => compute03 }
-
-  #Needed to address a short term failure in nova-volume management - bug has been filed
-#  class { 'nova::compute::file_hack': }
-
-#  class { 'openstack::auth_file':
-#    admin_password       => $admin_password,
-#    keystone_admin_token => $keystone_admin_token,
-#    controller_node      => $controller_node_internal,
-#  }
-
-#  class { 'openstack::compute':
-#    public_interface   => $public_interface,
-#    private_interface  => $private_interface,
-#    internal_address   => $ipaddress_eth0,
-#    libvirt_type       => 'kvm',
-#    fixed_range        => $fixed_network_range,
-#    network_manager    => 'nova.network.manager.FlatDHCPManager',
-#    multi_host         => $multi_host,
-#    #sql_connection     => $sql_connection,
-#    nova_user_password => $nova_user_password,
-#    #rabbit_host        => $controller_node_primary,
-#    rabbit_password    => $rabbit_password,
-#    rabbit_user        => $rabbit_user,
-#    rabbit_addresses   => $rabbit_addresses,
-#    glance_api_servers => "192.168.220.40:9292",
-#    api_bind_address   => $ipaddress_eth0,
-#    vncproxy_host      => $controller_node_address,
-#    vnc_enabled        => 'true',
-#    verbose            => $verbose,
-#    manage_volumes     => true,
-#    nova_volume        => 'nova-volumes',
-#  }
 }
 
 node /build-os/ inherits "cobbler-node" {

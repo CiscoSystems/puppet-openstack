@@ -70,6 +70,8 @@ class openstack::controller(
   $nova_user_password      = 'nova_pass',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
+  $cluster_rabbit          = false,
+  $cluster_disk_nodes      = [],
   # network configuration
   # this assumes that it is a flat network manager
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
@@ -248,12 +250,21 @@ class openstack::controller(
 
   ######## BEGIN NOVA ###########
 
-
+ if $cluster_rabbit {
+  class { 'nova::rabbitmq':
+    userid   => $rabbit_user,
+    password => $rabbit_password,
+    config_cluster => true,
+    cluster_disk_nodes => $cluster_disk_nodes,
+    enabled  => $enabled,
+  }
+ } else {
   class { 'nova::rabbitmq':
     userid   => $rabbit_user,
     password => $rabbit_password,
     enabled  => $enabled,
   }
+ }
 
   # TODO I may need to figure out if I need to set the connection information
   # or if I should collect it

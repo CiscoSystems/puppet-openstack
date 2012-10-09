@@ -2,6 +2,18 @@
 
 node /swiftproxy01/ inherits base {
 
+  # Configure /etc/network/interfaces file
+  class { 'networking::interfaces':
+  # Node Types: controller, compute, swift-proxy, swift-storage, or load-balancer
+   node_type           => load-balancer,
+   mgt_is_public       => true,
+   mgt_interface       => "eth0",
+   mgt_ip              => "192.168.220.61",
+   mgt_gateway         => "192.168.220.1",
+   dns_servers         => "192.168.220.254",
+   dns_search          => "dmz-pod2.lab",
+ }
+
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
  class { keepalived: }
@@ -177,6 +189,18 @@ node /swiftproxy01/ inherits base {
 }
 
 node /swiftproxy02/ inherits base {
+
+  # Configure /etc/network/interfaces file
+  class { 'networking::interfaces':
+  # Node Types: controller, compute, swift-proxy, swift-storage, or load-balancer
+   node_type           => load-balancer,
+   mgt_is_public       => true,
+   mgt_interface       => "eth0",
+   mgt_ip              => "192.168.220.62",
+   mgt_gateway         => "192.168.220.1",
+   dns_servers         => "192.168.220.254",
+   dns_search          => "dmz-pod2.lab",
+ }
 
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
