@@ -1,6 +1,11 @@
-# This file is used to define dedicated HAproxy nodes for load-balancing 3 OpenStack Controller Nodes
+#
+# This file is to serve as an example for deploying 
+# two dedicated HAproxy nodes for load-balancing 
+# three OpenStack Controllers and two Swift Proxies
+# This example file should then be imported into your Site.pp manifest
+#
 
-node /swiftproxy01/ inherits base {
+node /<SLB-01>/ inherits base {
 
   # Configure /etc/network/interfaces file
   class { 'networking::interfaces':
@@ -14,8 +19,12 @@ node /swiftproxy01/ inherits base {
    dns_search          => "dmz-pod2.lab",
  }
 
+ # Required for supporting a virtual IP address not directly associated to the node.
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
 
+ # Keepalived is used to provide high-availability between HAProxy Nodes.
+ # Two instances are created, one for the Controller Cluster VIP and the other for the Swift Proxy VIP.
+ # Take note that this node is active for the Controller VIP.
  class { keepalived: }
   keepalived::instance { '50':
    interface         => 'eth0',
@@ -24,6 +33,7 @@ node /swiftproxy01/ inherits base {
    priority          => '101',
  }
 
+ # Take note that this node is the backup for the Swift Proxy VIP.
  keepalived::instance { '51':
   interface         => 'eth0',
   virtual_ips       => "${$swiftproxy_vip_address} dev eth0",
@@ -31,6 +41,8 @@ node /swiftproxy01/ inherits base {
   priority          => '100',
  }
 
+ # This class configures all global, default, and server cluster parameters.
+ # Note that all haproxy::config definition use the Controller VIP except the swift_proxy_cluster.
  class { 'haproxy':
    enable                   => true,
    
@@ -188,7 +200,7 @@ node /swiftproxy01/ inherits base {
 
 }
 
-node /swiftproxy02/ inherits base {
+node /<SLB-02>/ inherits base {
 
   # Configure /etc/network/interfaces file
   class { 'networking::interfaces':
@@ -202,8 +214,12 @@ node /swiftproxy02/ inherits base {
    dns_search          => "dmz-pod2.lab",
  }
 
+ # Required for supporting a virtual IP address not directly associated to the node.
  sysctl::value { "net.ipv4.ip_nonlocal_bind": value => "1" }
-
+ 
+ # Keepalived is used to provide high-availability between HAProxy Nodes.
+ # Two instances are created, one for the Controller Cluster VIP and the other for the Swift Proxy VIP.
+ # Take note that this node is the backup for the Controller VIP.
  class { keepalived: }
   keepalived::instance { '50':
    interface         => 'eth0',
@@ -212,6 +228,7 @@ node /swiftproxy02/ inherits base {
    priority          => '100',
  }
 
+ # Take note the this node is active for the Swift Proxy VIP.
  keepalived::instance { '51':
   interface         => 'eth0',
   virtual_ips       => "${$swiftproxy_vip_address} dev eth0",
@@ -219,6 +236,8 @@ node /swiftproxy02/ inherits base {
   priority          => '101',
  }
 
+ # This class configures all global, default, and server cluster parameters.
+ # Note that all haproxy::config definition use the Controller VIP except the swift_proxy_cluster.
  class { 'haproxy':
    enable                   => true,
    
