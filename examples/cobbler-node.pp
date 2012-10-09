@@ -11,17 +11,14 @@
 #
 
 # A node definition for cobbler
-# You will likely also want to change the IP addresses, domain name, and perhaps
-# even the proxy address
+# You will likely also want to change IP addressing, domain name, and perhaps the proxy address.
 # If you are not using UCS blades, don't worry about the org-EXAMPLE, and if you are
 # and aren't using an organization domain, just leave the value as ""
-# An example MD5 crypted password is ubuntu: $6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1
+# An example MD5 crypted password is "ubuntu": $6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1
 # which is used by the cobbler preseed file to set up the default admin user.
 
 ###### GLOBAL VARIABLES #########
 $cobbler_node_ip = "192.168.220.254"
-$node_public_interface = "eth1"
-$node_public_netmask = "255.255.255.0"
 #################################
 
 node /cobbler-node/ {
@@ -40,12 +37,12 @@ node /cobbler-node/ {
   proxy => "http://${cobbler_node_ip}:3142/",
   password_crypted => '$6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1',
  }
-
-# This will load the Ubuntu precise x86_64 server iso into cobbler
+  
+ # This will load the Ubuntu Precise x86_64 server ISO into cobbler.
  cobbler::ubuntu { "precise":
- }
+ } 
 
-# This will build a preseed file called 'cisco-preseed' in /etc/cobbler/preseeds/
+ # This will build a preseed file called 'cisco-preseed' in /etc/cobbler/preseeds/
  cobbler::ubuntu::preseed { "cisco-preseed":
   packages => "gfs2-utils openssh-server vim vlan lvm2 ntp puppet ipmitool",
   ntp_server => "192.168.220.1",
@@ -55,7 +52,6 @@ sed -e "/logdir/ a server=build-os.dmz-pod2.lab" -i /target/etc/puppet/puppet.co
 sed -e "s/START=no/START=yes/" -i /target/etc/default/puppet ; \
 echo -e "server 192.168.220.1 iburst" > /target/etc/ntp.conf ; \
 echo "8021q" >> /target/etc/modules ; \
-echo -e "# Private Interface\nauto eth0.221\niface eth0.221 inet manual\n\tvlan-raw-device eth0\n\tup ifconfig eth0.221 0.0.0.0 up\n" >> /target/etc/network/interfaces ; \
 true
 ',
   proxy => "http://${cobbler_node_ip}:3142/",
