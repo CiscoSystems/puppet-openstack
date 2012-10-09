@@ -9,24 +9,18 @@
 #
 # This example assumes a few things:
 #   * the multi-node scenario requires a puppetmaster
-#   * it assumes that networking is correctly configured
+#   * networking is correctly configured
 #
-# These nodes need to be brought up in a certain order
+# These nodes need to be brought up in the following order:
 #
 # 1. storage nodes
 # 2. ringbuilder
 # 3. run the storage nodes again (to synchronize the ring db)
 # 4. run the proxy
 # 5. test that everything works!!
-# this site manifest serves as an example of how to
-# deploy various swift environments
+# this site manifest serves as an example of how to deploy a multi-node swift environment.
 
-#$admin_email          = 'dan@example_company.com'
-#$keystone_db_password = 'keystone_db_password'
-#$keystone_admin_token = 'keystone_token'
-#$admin_password       = 'admin_password'
-
-# swift specific configurations
+# Top-level Swift Configuration Parameters
 $swift_user_password     = 'swift_pass'
 $swift_shared_secret     = 'Gdr8ny7YyWqy2'
 $swift_local_net_ip      = $ipaddress_eth0
@@ -113,14 +107,7 @@ node /swift03/ inherits swift_base {
 
 }
 
-#
-# The example below is used to model swift storage nodes that
-# manage 2 endpoints.
-#
-# The endpoints are actually just loopback devices. For real deployments
-# they would need to be replaced with something that create and mounts xfs
-# partitions
-#
+# Used to create XFS volumes for Swift storage nodes.
 
 class swift-ucs-disk {
 
@@ -182,13 +169,6 @@ class swift-ucs-disk {
 }
 
 class role_swift_storage {
-
-  # create xfs partitions on a loopback device and mount them
-  #swift::storage::loopback { ['1', '2']:
-  #  base_dir     => '/srv/loopback-device',
-  #  mnt_base_dir => '/srv/node',
-  #  require      => Class['swift'],
-  #}
 
   # install all swift storage servers together
   class { 'swift::storage::all':
@@ -277,8 +257,7 @@ class role_swift_storage {
 
 }
 
-
-node /compute02/ inherits swift_base {
+node /<proxy_node1>/ inherits swift_base {
 
  # Configure /etc/network/interfaces file
  class { 'networking::interfaces':
@@ -382,7 +361,7 @@ node /compute02/ inherits swift_base {
  }
 }
 
-node /compute03/ inherits swift_base {
+node /<swift_proxy2>/ inherits swift_base {
 
  # Configure /etc/network/interfaces file
  class { 'networking::interfaces':
