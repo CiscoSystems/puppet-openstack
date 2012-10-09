@@ -73,6 +73,8 @@ true
 # power_type supported options include UCS for B-Series and ipmitool for C-Series servers
 # power user/password username/password for user account with permissions to manage the server 
 # (For B-Series servers) Power-ID needs to map to power port or service profile name (in UCSM based deployements)
+# Note: ip definitions have been removed from cobbler::node
+# ip addresses are now being managed by the puppet-networking module.
 
 cobbler::node { "control01":
  mac => "A4:4C:11:13:8B:D2",
