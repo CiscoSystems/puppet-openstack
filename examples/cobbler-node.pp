@@ -21,6 +21,8 @@
 $cobbler_node_ip = "192.168.220.254"
 #################################
 
+# This is the node definition for the Cobbler server.  
+# Do not change the name, as it is imported into site.pp as cobbler-node.
 node /cobbler-node/ {
 
  class { cobbler:
@@ -61,8 +63,16 @@ true
   boot_disk => '/dev/sdc',
  }
 
-# The following are node definitions that will allow cobbler to PXE boot the hypervisor OS onto the system (based on the preseed built above)
-# You will want to adjust the "title" (maps to system name in cobbler), mac address (this is the PXEboot MAC target), IP (this is a static DHCP delivered address for this particular node), domain (added to /etc/resolv.conf for proper function), power address, the same one for power-strip based power control, per-node for IPMI/CIMC/ILO based control, power-ID needs to map to power port or service profile name (in UCSM based deployements)
+# The following are node definitions that will allow cobbler to
+# PXE boot the hypervisor OS onto the system (based on the preseed built above).
+# You will want to adjust the "title" (maps to system name in cobbler), 
+# mac address (this is the MAC address associated to the interface used for PXE booting), 
+# IP (this is a static DHCP delivered address for this particular node), 
+# domain (added to /etc/resolv.conf for proper function), 
+# power address (IP address of CIMC interface of server), 
+# power_type supported options include UCS for B-Series and ipmitool for C-Series servers
+# power user/password username/password for user account with permissions to manage the server 
+# (For B-Series servers) Power-ID needs to map to power port or service profile name (in UCSM based deployements)
 
 cobbler::node { "control01":
  mac => "A4:4C:11:13:8B:D2",
@@ -181,6 +191,5 @@ cobbler::node { "swift03":
  power_password => "password",
  }
 
-# Repeat as necessary.
+# Repeat cobbler::node definitions as necessary.
 }
-
