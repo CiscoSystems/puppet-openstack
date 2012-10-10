@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 repo_file = 'other_repos.yaml'
-default_modulepath = '/etc/puppet/modules'
+default_modulepath = '/usr/share/puppet/modules'
 
 namespace :modules do
   desc 'clone all required modules'

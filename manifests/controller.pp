@@ -70,6 +70,7 @@ class openstack::controller(
   $nova_user_password      = 'nova_pass',
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
+  $rabbit_addresses        = [$controller_node_primary, $controller_node_secondary,$controller_node_tertiary],
   $cluster_rabbit          = false,
   $cluster_disk_nodes      = [],
   # network configuration
@@ -103,11 +104,12 @@ class openstack::controller(
 
   $glance_api_servers = "${virtual_address}:9292"
   $nova_db = "mysql://nova:${nova_db_password}@${virtual_address}/nova"
+  #$rabbit_servers = "UNDEF"
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    @@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
-    Nova_config <| title == 'rabbit_addresses' |> 
+    #@@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
+    #Nova_config <| title == 'rabbit_addresses' |> 
     @@nova_config { 'sql_connection': value => $sql_connection }
     Nova_config <| title == 'sql_connection' |>
     @@nova_config { 'glance_api_servers': value => $glance_connection }
@@ -119,7 +121,7 @@ class openstack::controller(
   } else {
     $sql_connection    = $nova_db
     $glance_connection = $glance_api_servers
-    $rabbit_addresses = $rabbit_addresses
+    #$rabbit_addresses
   }
 
   ####### DATABASE SETUP ######
