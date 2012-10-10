@@ -2,7 +2,7 @@
 repos:
   repo_paths:
     # Core OpenStack Repos
-    git://github.com/danehans/puppet-openstack: openstack
+    #git://github.com/danehans/puppet-openstack: openstack
     git://github.com/danehans/puppetlabs-nova: nova
     git://github.com/danehans/puppetlabs-glance: glance
     git://github.com/danehans/puppetlabs-keystone: keystone
