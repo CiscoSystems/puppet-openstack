@@ -50,14 +50,12 @@ These modules are based on the administrative guides for OpenStack
       - This network is used to perform management functions against the node, Puppet Master <> Agent is an example.
       - An IP address for each node is required for this network.
       - This network typically employs private (RFC 1918) IP addressing.
-
   * Nova Public/API Network
       - This network is used for assigning Floating IP addresses to instances, 
         for communicating outside of the OpenStack cloud, etc..
       - An IP address for the node is required for this network.
       - (Optional) This network can be collapsed with the OpenStack Management Network.
       - This network typically employs publicly routable IP addressing.
-
   * Instance Network
       - This network is used for providing connectivity to OpenStack Instances using either the Flat or VLAN Nova Networking Manager.
       - An IP address for the node is not necessary, as Nova automatically creates a bridge interface with an IP address.
@@ -74,20 +72,16 @@ These modules are based on the administrative guides for OpenStack
 
   * Load Balancer Node
        - Runs HAProxy and Keeplived. 
-       - Provides monitoring and fail-over for API endpoints and between load-balancer nodes.
-
+       - Provides monitoring and fail-over for API endpoints and between load-balancer nodes.  
   * Controller Node
        - Runs MySQL Galera, Keystone, Glance, Nova, Horizon, and RabbitMQ.
-       - Provides control plane functionality for managing the OpenStack Nova environment.
-
+       - Provides control plane functionality for managing the OpenStack Nova environment.  
   * Compute Node
        - Runs the following Nova services: api, compute, network, and volume.
-       - Provides necessary infrastructure services to Nova Instances.
-
+       - Provides necessary infrastructure services to Nova Instances.  
   * Swift Proxy Node
        - Runs swift-proxy, memcached, and keystone-client.
-       - Authenticates users against Keystone and acts as a translation layer between clients and storage.
-
+       - Authenticates users against Keystone and acts as a translation layer between clients and storage.  
   * Swift Storage Node
        - Runs Swift account/container/object services.  XFS is used as the filesystem.
        - Controls storage of the account databases, container databases, and the stored objects.
@@ -96,32 +90,32 @@ These modules are based on the administrative guides for OpenStack
 
 ### Installation Order
 
-  The OpenStack Nodes are required to be deployed in a specific order. 
+  The OpenStack Nodes are required to be deployed in a very specific order. 
   For the time being, you need to perform multiple puppet runs for 
   most Nodes to deploy properly.  The following is the order in which the nodes should be deployed:
 	
- * '''HAproxy Nodes''': Make sure the haproxy/keepalived services are running
+ * **HAproxy Nodes**: Make sure the haproxy/keepalived services are running
 	  and the config files look good before proceeding. It is also very important 
 	  that you test connectivity to Virtual IP addresses (telnet <vip_addr> <port>). 
 	  If the VIP's are not working then the build-out of nodes will fail.
 	
- * '''Swift Storage Nodes''': The drives should be zero'ed out if you are rebuilding 
+ * **Swift Storage Nodes**: The drives should be zero'ed out if you are rebuilding 
 	  the swift storage nodes. Use clean-disk.pp from the Cisco repo or
 	  use the following command:
 
           for i in  b c d e f <add/subtract drive letters as needed>
-          do 
-	  dd bs=1M count=1000 if=/dev/zero of=/dev/sd$i
-	  done
+          do
+          dd bs=1M count=1000 if=/dev/zero of=/dev/sd$i
+          done
 	
- * '''Swift Proxy Node #1''': Make sure the ring is functional before adding the 2nd Proxy.
+ * **Swift Proxy Node #1**: Make sure the ring is functional before adding the 2nd Proxy.
 
- * '''Swift Proxy Node 2''': Make sure the ring is functional before proceeding.
+ * **Swift Proxy Node 2**: Make sure the ring is functional before proceeding.
 	
- * '''Controller Nodes 1-3''': You must ensure that the HAproxy Virtual IP address 
+ * **Controller Nodes 1-3**: You must ensure that the HAproxy Virtual IP address 
    for the Controller cluster is working or your puppet run will fail.
 	
- * '''Compute Nodes''': Start off with just 1 or 2 nodes before deploying a large number.
+ * **Compute Nodes**: Start off with just 1 or 2 nodes before deploying a large number.
 	
  * Test to make sure environment is functional.
 
