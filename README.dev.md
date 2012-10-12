@@ -223,7 +223,7 @@ These modules are based on the administrative guides for OpenStack
 
   For more information on the parameters, check out the inline documentation in the manifest:
 
-    <module_path>/cobbler/manifests/init.pp
+    module_path/cobbler/manifests/init.pp
 
 ####cobbler::ubuntu
 
@@ -237,7 +237,7 @@ These modules are based on the administrative guides for OpenStack
 
  For more information on the parameters, review the inline documentation within the manifest:
 
-	<module_path>/cobbler/manifests/ubuntu.pp
+	module_path/cobbler/manifests/ubuntu.pp
 
 ####cobbler::node
 
@@ -269,7 +269,7 @@ These modules are based on the administrative guides for OpenStack
 
  For more information on the parameters, check out the inline documentation in the manifest:
 
-	<module_path>/cobbler/manifests/node.pp
+	module_path/cobbler/manifests/node.pp
 
 ###[site manifest](https://github.com/danehans/puppet-openstack/blob/master/examples/site.pp)
 
@@ -318,22 +318,22 @@ These modules are based on the administrative guides for OpenStack
  for the Nova Instance (flat) network and collapses the public/management networks:
 
           class { 'networking::interfaces':
-  	    node_type           => controller,
-  	    mgt_is_public       => true,
-  	    vlan_networking     => true,
-  	    vlan_interface      => "eth0",
-  	    mgt_interface       => "eth0",
-  	    mgt_ip              => "192.168.220.41",
-  	    mgt_gateway         => "192.168.220.1",
-  	    flat_vlan           => "221",
-  	    flat_ip             => "10.0.0.251",
-  	    dns_servers         => "192.168.220.254",
-  	    dns_search          => "dmz-pod2.lab",
-  	  }
+  	      node_type           => controller,
+  	      mgt_is_public       => true,
+  	      vlan_networking     => true,
+  	      vlan_interface      => "eth0",
+  	      mgt_interface       => "eth0",
+  	      mgt_ip              => "192.168.220.41",
+  	      mgt_gateway         => "192.168.220.1",
+  	      flat_vlan           => "221",
+  	      flat_ip             => "10.0.0.251",
+  	      dns_servers         => "192.168.220.254",
+  	      dns_search          => "dmz-pod2.lab",
+  	    }
 
  For more information on the parameters, check out the inline documentation in the manifest:
 
-  <module_path>/networking/manifests/interfaces.pp
+  module_path/networking/manifests/interfaces.pp
 
 
 ####[galera class](https://github.com/danehans/puppet-galera/blob/master/manifests/init.pp)
@@ -372,12 +372,12 @@ These modules are based on the administrative guides for OpenStack
 
   This is a simple class to use:
 
-    		class {'galera::haproxy': }
+      class {'galera::haproxy': }
 
   If needed, you can define account credentials for the service account. 
   For more information on the parameters, check out the inline documentation in the manifest:
 
-      <module_path>/galera/manifests/haproxy.pp
+      module_path/galera/manifests/haproxy.pp
 		
 ####[openstack::controller](https://github.com/danehans/puppet-openstack/blob/master/manifests/controller.pp)
 
@@ -480,7 +480,7 @@ The openstack::compute class deploys the following services:
   For more information on the parameters, check out the inline documentation in
   the manifest:
 
-    <module_path>/openstack/manifests/compute.pp
+    module_path/openstack/manifests/compute.pp
 
 ###Customizing Manifests
 
@@ -576,27 +576,27 @@ The servers that act as your Swift Proxies and Storage Nodes should be managed b
 Make sure you your cobbler-node manifest is properly configured and you have added
 node definitions for your Swift Nodes.  Here is an example:
 
-                 	cobbler::node { "swift-proxy01":
-                 	  mac => "A4:4C:11:13:44:93",
-                 	  profile => "precise-x86_64-auto",
-                 	  domain => "dmz-pod2.lab",
-                 	  preseed => "/etc/cobbler/preseeds/cisco-preseed",
-                 	  power_address => "192.168.220.8",
-                 	  power_type => "ipmitool",
-                 	  power_user => "admin",
-                 	  power_password => "password",
-                 	 }
+            cobbler::node { "swift-proxy01":
+              mac => "A4:4C:11:13:44:93",
+              profile => "precise-x86_64-auto",
+              domain => "dmz-pod2.lab",
+              preseed => "/etc/cobbler/preseeds/cisco-preseed",
+              power_address => "192.168.220.8",
+              power_type => "ipmitool",
+              power_user => "admin",
+              power_password => "password",
+            }
                  
-                 	cobbler::node { "swift-storage01":
-                 	  mac => "A4:4C:11:13:BA:17",
-                 	  profile => "precise-x86_64-auto",
-                 	  domain => "dmz-pod2.lab",
-                 	  preseed => "/etc/cobbler/preseeds/cisco-preseed",
-                 	  power_address => "192.168.220.10",
-                 	  power_type => "ipmitool",
-                 	  power_user => "admin",
-                 	  power_password => "password",
-                 	 }
+            cobbler::node { "swift-storage01":
+              mac => "A4:4C:11:13:BA:17",
+              profile => "precise-x86_64-auto",
+              domain => "dmz-pod2.lab",
+              preseed => "/etc/cobbler/preseeds/cisco-preseed",
+              power_address => "192.168.220.10",
+              power_type => "ipmitool",
+              power_user => "admin",
+              power_password => "password",
+            }
 
 puppet apply the site.pp file to add the nodes to Cobbler:
 
@@ -609,25 +609,25 @@ Verify that the nodes have been added to Cobbler
 Next, edit the node definitions and network settings in /etc/puppet/manifests/swift-nodes.pp.  Replace existing node definitions 
 with the hostname/certname of your Swift Storage and Proxy Nodes.
 
-        	vi /etc/puppet/manifests/swift-nodes.pp
+        vi /etc/puppet/manifests/swift-nodes.pp
         
-        	node /swift01/
+        node /swift01/
         
-        	node /swift02/
-        	
-        	node /swift03/
+        node /swift02/
         
-        	node /swiftproxy01/
+        node /swift03/
+        
+        node /swiftproxy01/
 	
-     	  	class { 'networking::interfaces':
-     	  	  node_type           => load-balancer,
-     	      mgt_is_public       => true,
-     	      mgt_interface       => "eth0",
-     	      mgt_ip              => "192.168.220.62",
-     	      mgt_gateway         => "192.168.220.1",
-     	      dns_servers         => "192.168.220.254",
-     	      dns_search          => "dmz-pod2.lab",
-     	    }
+       class { 'networking::interfaces':
+     	 node_type           => load-balancer,
+     	 mgt_is_public       => true,
+     	 mgt_interface       => "eth0",
+     	 mgt_ip              => "192.168.220.62",
+     	 mgt_gateway         => "192.168.220.1",
+     	 dns_servers         => "192.168.220.254",
+     	 dns_search          => "dmz-pod2.lab",
+      }
 
 **Note:** Do not define the 2nd Swift Proxy until the storage Nodes and first proxy 
 are deployed and the ring is established.  Also, add additional Storage Node definitions as needed.
@@ -657,10 +657,10 @@ The [example configuration](https://github.com/danehans/puppet-openstack/blob/ma
 creates five storage devices on every node.  Make sure to increase/decrease the following swift-nodes.pp definitions 
 based on the number of hard disks in your Storage Nodes:
 
-          	swift::storage::disk
-          	@@ring_object_device
-          	@@ring_container_device
-          	@@ring_account_device
+          swift::storage::disk
+          @@ring_object_device
+          @@ring_container_device
+          @@ring_account_device
 	
 Better examples of this will be provided in a future version of the module.
 
@@ -670,58 +670,58 @@ The servers that act as your Nova Controllers and Compute Nodes should be manage
 Make sure you your cobbler-node manifest is properly configured and you have added
 node definitions for your Controller and Compute Nodes.  Here is an example:
 
-            	cobbler::node { "control01":
-            	 mac => "A4:4C:11:13:44:93",
-            	 profile => "precise-x86_64-auto",
-            	 domain => "dmz-pod2.lab",
-            	 preseed => "/etc/cobbler/preseeds/cisco-preseed",
-            	 power_address => "192.168.220.8",
-            	 power_type => "ipmitool",
-            	 power_user => "admin",
-            	 power_password => "password",
-             }
+          cobbler::node { "control01":
+            mac => "A4:4C:11:13:44:93",
+            profile => "precise-x86_64-auto",
+            domain => "dmz-pod2.lab",
+            preseed => "/etc/cobbler/preseeds/cisco-preseed",
+            power_address => "192.168.220.8",
+            power_type => "ipmitool",
+            power_user => "admin",
+            power_password => "password",
+          }
             
-            	cobbler::node { "compute01":
-            	 mac => "A4:4C:11:13:BA:17",
-            	 profile => "precise-x86_64-auto",
-            	 domain => "dmz-pod2.lab",
-            	 preseed => "/etc/cobbler/preseeds/cisco-preseed",
-            	 power_address => "192.168.220.10",
-            	 power_type => "ipmitool",
-            	 power_user => "admin",
-            	 power_password => "password",
-             }
+          cobbler::node { "compute01":
+            mac => "A4:4C:11:13:BA:17",
+            profile => "precise-x86_64-auto",
+            domain => "dmz-pod2.lab",
+            preseed => "/etc/cobbler/preseeds/cisco-preseed",
+            power_address => "192.168.220.10",
+            power_type => "ipmitool",
+            power_user => "admin",
+            power_password => "password",
+          }
 
 puppet apply the site.pp file to add the nodes to Cobbler:
 	
-         	puppet apply /etc/puppet/manifests/site.pp -v
+          puppet apply /etc/puppet/manifests/site.pp -v
 
 Verify that the nodes have been added to Cobbler
 	
-         	cobbler system list
+          cobbler system list
 
 Next, edit the node definitions and network settings in /etc/puppet/manifests/site.pp.  
-Replace <control01>, <control02>, <control03>, <compute01> with the hostname/certname of your Controller/Compute Nodes.
+Replace control01, control02, control03, compute01 with the hostname/certname of your Controller/Compute Nodes.
 	
-           	vi /etc/puppet/manifests/site.pp
+          vi /etc/puppet/manifests/site.pp
            	
-           	node /<control01>/
+          node /<control01>/
            	
-           	node /<control02>/
+          node /<control02>/
            
-           	node /<control03>/
+          node /<control03>/
            	
-           	node /<compute01>/	
+          node /<compute01>/	
           	
-            class { 'networking::interfaces':
-          	  node_type           => load-balancer,
-              mgt_is_public       => true,
-              mgt_interface       => "eth0",
-              mgt_ip              => "192.168.220.62",
-              mgt_gateway         => "192.168.220.1",
-              dns_servers         => "192.168.220.254",
-              dns_search          => "dmz-pod2.lab",
-            }
+          class { 'networking::interfaces':
+            node_type           => load-balancer,
+            mgt_is_public       => true,
+            mgt_interface       => "eth0",
+            mgt_ip              => "192.168.220.62",
+            mgt_gateway         => "192.168.220.1",
+            dns_servers         => "192.168.220.254",
+            dns_search          => "dmz-pod2.lab",
+          }
 
 Note: Add additional Compute Node definitions as needed.
 
@@ -729,9 +729,6 @@ Lastly, run puppet on the load-balancer nodes
 
 	puppet agent -t -d
 	
-les.
-
-
 Keep in mind that the deployment ***MUST*** be performed in a very specific order (outlined above).
 You can either make all the necessary changes to your site manifests and keep particular nodes powered-off.  
 Or, you can for building out an OpenStack HA deployment scenario is to choose the IP addresses of the controller node.
@@ -750,7 +747,7 @@ The optionstack::auth_file class creates the file:
 which stores environment variables that can be used for authentication of
 openstack command line utilities.
 
-#### Usage Example:
+* Usage Example:
 
         class { 'openstack::auth_file':
           admin_password       => 'my_admin_password',
@@ -772,20 +769,20 @@ openstack command line utilities.
 
 3. Verify Keystone is operational:
 
-      		service keystone status
+      	# service keystone status
 
 4. Ensure the Keystone Service Endpoints have been properly configured:
 
-      		keystone endpoint-list
+      	# keystone endpoint-list
 
 5. Verify glance is operational:
 
-       	service glance-api status
-      		service glance-registry status
+       	# service glance-api status
+      	# service glance-registry status
 
 6. Verify that all of the Nova services on all Nodes are operational:
 
-         nova-manage service list
+         # nova-manage service list
          Binary           Host          Zone   Status     State Updated_At
          nova-volume      <your_host>   nova   enabled    :-)   2012-06-06 22:30:05
          nova-consoleauth <your_host>   nova   enabled    :-)   2012-06-06 22:30:04
@@ -796,15 +793,15 @@ openstack command line utilities.
 
 7. Add an image to Glance.  This example uses an Ubuntu Precise image:
 
-       		wget http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img
-       		glance add name="precise" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
+       	# wget http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img
+       	
+        # glance add name="precise" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
 
 
 8. Connect to the Horizon Virtual IP address (OpenStack Dashboard) through a web browser:
 
   - create a keypair
-	 - edit the default security group to allow icmp -1 -1 
-	   and tcp 22 22 for testing purposes.
+  - edit the default security group to allow icmp -1 -1 and tcp 22 22 for testing purposes.
   - fire up a VM.
   - create a volume.
   - attach the volume to the VM.
@@ -832,15 +829,13 @@ The process for contributing code is as follows:
 
 * fork the projects in github
 * submit pull requests to the projects containing code contributions
-    - rspec tests are preferred but not required with initial pull requests.
-      I am happy to work with folks to help them get then up and going with
-      rspec-puppet.
+
 
 ## Future features:
 
   Efforts are underway to implement the following additional features:
 
-  * Suppoer penStack Folsom release
+  * Support OpenStack Folsom release
   * These modules are currently intended to be classified and data-fied in a
     site.pp. Starting in version 3.0, it is possible to populate class
     parameters explicitly using puppet data bindings (which use hiera as the
