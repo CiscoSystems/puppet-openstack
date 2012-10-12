@@ -92,7 +92,8 @@ These modules are based on the administrative guides for OpenStack
 
   The OpenStack Nodes are required to be deployed in a very specific order. 
   For the time being, you need to perform multiple puppet runs for 
-  most Nodes to deploy properly.  The following is the order in which the nodes should be deployed:
+  most Nodes to deploy properly.  The following is the order in which the nodes should be deployed.
+  Preface commands with **sudo** if you are not the root user:
 	
  * **HAproxy Nodes**: Make sure the haproxy/keepalived services are running
 	  and the config files look good before proceeding. It is also very important 
@@ -129,10 +130,6 @@ These modules are based on the administrative guides for OpenStack
 
       `apt-get install rake git`
 
-  * Some features of the modules require
-      [storedconfigs](http://projects.puppetlabs.com/projects/1/wiki/Using_Stored_Configuration)
-      to be enabled on the Puppet Master.
-
 ### Install the Openstack HA Modules
 
   The Openstack HA modules should be installed into the module path of your Build Node.
@@ -152,10 +149,10 @@ These modules are based on the administrative guides for OpenStack
 
   * Copy the example OpenStack HA manifests to your manifests directory:
 
-       cp <module_path>/openstack/examples/ha-site.pp /etc/puppet/manifests/site.pp
-       cp <module_path>/openstack/examples/haproxy-nodes.pp /etc/puppet/manifests/haproxy-nodes.pp
-       cp <module_path>/openstack/examples/cobbler-node.pp /etc/puppet/manifests/cobbler-node.pp
-       cp <module_path>/openstack/examples/swift-nodes.pp /etc/puppet/manifests/swift-nodes.pp
+    	cp <module_path>/openstack/examples/ha-site.pp /etc/puppet/manifests/site.pp
+    	cp <module_path>/openstack/examples/haproxy-nodes.pp /etc/puppet/manifests/haproxy-nodes.pp
+    	cp <module_path>/openstack/examples/cobbler-node.pp /etc/puppet/manifests/cobbler-node.pp
+    	cp <module_path>/openstack/examples/swift-nodes.pp /etc/puppet/manifests/swift-nodes.pp
 
   * Edit the manifests according to your deployment needs. At a minimum, the following should be changed:
 
@@ -165,224 +162,224 @@ These modules are based on the administrative guides for OpenStack
 	 - user/password information
 	 - (Optional) interface definitions
 	 - (Optional) additional Compute Node and Swift Storage Node definitions
-	 - (Optional) additional Swift Storage Node hard drive definitions
+	 - (Optional) additional Swift Storage Node hard drive definitions  
 
   * The proceeding sections will detail the example manifests and configuration options.
 
 ## Overview of Key Modules
 
-puppet-openstack module
+###[puppet-openstack module](https://github.com/danehans/puppet-openstack)
 
- * The 'puppet-openstack' module was written for users interested in deploying 
-   and managing a production-grade, highly-available OpenStack deployment.
-   It provides a simple and flexible means of deploying OpenStack, and is based on 
-   best practices shaped by companies that contributed to the design of these modules.
+ The 'puppet-openstack' module was written for users interested in deploying 
+ and managing a production-grade, highly-available OpenStack deployment.
+ It provides a simple and flexible means of deploying OpenStack, and is based on 
+ best practices shaped by companies that contributed to the design of these modules.
 
-puppet-cobbler module
+###[puppet-cobbler module](https://github.com/danehans/puppet-cobbler)
 
- * The 'puppet-cobbler' module is used to provide several key tasks such as, 
-   bare-metal OS provisioning, ILO management of servers, etc..
+ The 'puppet-cobbler' module is used to provide several key tasks such as, 
+ bare-metal OS provisioning, ILO management of servers, etc..
 
-puppet-swift module
+###[puppet-swift module](https://github.com/CiscoSystems/puppet-swift)
 
- * The 'puppet-swift' module manages all configuration aspects of Swift Proxy
-   and Swift Storage Nodes.  The module relies on underlying technologies/modules
-   to deliver object storage functionality to your OpenStack environment.
+ The 'puppet-swift' module manages all configuration aspects of Swift Proxy
+ and Swift Storage Nodes.  The module relies on underlying technologies/modules
+ to deliver object storage functionality to your OpenStack environment.
 
-puppet-haproxy module
+###[puppet-haproxy module](https://github.com/danehans/puppet-haproxy)
 
- * The 'puppet-haproxy' module provides load-balancing services for API endpoints.
+ The 'puppet-haproxy' module provides load-balancing services for API endpoints.
 
 ## Overview of Example Manifests
 
-cobbler-node manifest
+###[cobbler-node manifest](https://github.com/danehans/puppet-openstack/blob/master/examples/cobbler-node.pp)
 
-  - $cobbler_node_ip: Is the IP address assigned to the Build Node and referenced throughout the manifest.
+ * Shared Variables
 
-* cobbler class
+   - $cobbler_node_ip: Is the IP address assigned to the Build Node and referenced throughout the manifest.
 
-  - This class installs/configures Cobbler and the PXE boot install engine.  
+####cobbler class
+
+ This class installs/configures Cobbler and the PXE boot install engine.  
 
  * Usage Example:
 
-  * A cobbler class is configured as follows:
+  A cobbler class is configured as follows:
 
-        	class { cobbler:
-         	  node_subnet => '192.168.220.0',
-         	  node_netmask => '255.255.255.0',
-         	  node_gateway => '192.168.220.1',
-         	  node_dns => "${cobbler_node_ip}",
-         	  ip => "${cobbler_node_ip}",
-         	  dns_service => 'dnsmasq',
-         	  dhcp_service => 'dnsmasq',
-         	  dhcp_ip_low => '192.168.220.240',
-         	  dhcp_ip_high => '192.168.220.250',
-         	  domain_name => 'dmz-pod2.lab',
-         	  proxy => "http://${cobbler_node_ip}:3142/",
-         	  password_crypted => '$6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1',
-        	}
+        class { cobbler:
+          node_subnet => '192.168.220.0',
+          node_netmask => '255.255.255.0',
+          node_gateway => '192.168.220.1',
+          node_dns => "${cobbler_node_ip}",
+          ip => "${cobbler_node_ip}",
+          dns_service => 'dnsmasq',
+          dhcp_service => 'dnsmasq',
+          dhcp_ip_low => '192.168.220.240',
+          dhcp_ip_high => '192.168.220.250',
+          domain_name => 'dmz-pod2.lab',
+          proxy => "http://${cobbler_node_ip}:3142/",
+          password_crypted => '$6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1',
+        }
 
-  * For more information on the parameters, check out the inline documentation in the manifest:
+  For more information on the parameters, check out the inline documentation in the manifest:
 
     <module_path>/cobbler/manifests/init.pp
 
-* cobbler::ubuntu
+####cobbler::ubuntu
 
-  - This class manages the Ubuntu ISO used to PXE boot servers.  
+ This class manages the Ubuntu ISO used to PXE boot servers.  
 
 * Usage Example:
 
-  - This class will load the Ubuntu Precise x86_64 server ISO into Cobbler:
+  This class will load the Ubuntu Precise x86_64 server ISO into Cobbler:
 
 	cobbler::ubuntu { "precise":}
 
-  - For more information on the parameters, review the inline documentation within the manifest:
+ For more information on the parameters, review the inline documentation within the manifest:
 
 	<module_path>/cobbler/manifests/ubuntu.pp
 
-* cobbler::node
+####cobbler::node
 
-  - This class installs a node into the cobbler system. Run puppet apply -v /etc/puppet/manifests/site.pp
-    after adding nodes to the cobbler::node class.  You can use the 'cobbler system list' command 
-    to verify that nodes have been properly added to Cobbler.
+  This manifest installs a node into the cobbler system. Run puppet apply -v /etc/puppet/manifests/site.pp
+  after adding nodes to cobbler::node.  You can use the 'cobbler system list' command 
+  to verify that nodes have been properly added to Cobbler.
 	    
 * Usage Example:
 
-  Most of the parameters are self explanatory, however here are a 
-  few parameters that require additional explanation:
-
-   - [power address] IP address of CIMC interface of server. 
-   - [power_type] supported options include 'UCS' for UCS B-Series and 'ipmitool' for UCS C-Series servers
-   - [power_user] and [power_password] username/password for a user account with permissions to manage the server.
-   - (For UCS B-Series servers only) Power-ID needs to map to the service profile name within UCS Manager.
-  
-  A cobbler::node class is configured as follows:
+  A cobbler::node is configured as follows:
 
           cobbler::node { "control01":
              mac => "A4:4C:11:13:8B:D2",
-          		 profile => "precise-x86_64-auto",
-          		 domain => "yourdomain.com",
-          		 preseed => "/etc/cobbler/preseeds/cisco-preseed",
-          		 power_address => "192.168.220.2",
-          		 power_type => "ipmitool",
-          		 power_user => "admin",
-          		 power_password => "password",
-          		}
-		
-  * For more information on the parameters, check out the inline documentation in the manifest:
+             profile => "precise-x86_64-auto",
+             domain => "yourdomain.com",
+             preseed => "/etc/cobbler/preseeds/cisco-preseed",
+             power_address => "192.168.220.2",
+             power_type => "ipmitool",
+             power_user => "admin",
+             power_password => "password",
+           }
+
+* Most of the parameters are self explanatory, however here are a few parameters that require additional explanation:
+
+   - **[power_address]** IP address of CIMC interface of server. 
+   - **[power_type]** supported options include 'UCS' for UCS B-Series and 'ipmitool' for UCS C-Series servers
+   - **[power_user]** and **[power_password]** username/password for a user account with permissions to manage the server.
+   - **[Power-ID]** (For UCS B-Series servers only) needs to map to the service profile name within UCS Manager.
+
+ For more information on the parameters, check out the inline documentation in the manifest:
 
 	<module_path>/cobbler/manifests/node.pp
 
-* site.pp manifest
+###[site manifest](https://github.com/danehans/puppet-openstack/blob/master/examples/site.pp)
 
   The site manifest provides the top-level configuration interface
   to the OpenStack HA environment.  I will outline the example manifest 
   so users can customize it as needed.  
   
   * The first module configured is apt.  Apt provides helpful definitions for dealing with package management.
-	  - class { 'apt': } This module manages the initial configuration of apt.
-	  - [apt::ppa] Adds the Cisco Edition ppa repository using `add-apt-repository`.
+    - class { 'apt': } This module manages the initial configuration of apt.
+    - [apt::ppa] Adds the Cisco Edition ppa repository using `add-apt-repository`.
  
   * Shared Variables: I will not address every shared variable, as many of them
     are self explanatory or include inline documentation.  Here is a list of shared variables 
     that can use additional explanation:
 
- 	 - [$multi_host] Must be set to true. Establishes the [Nova multi-host networking model] (http://docs.openstack.org/trunk/openstack-compute/admin/content/existing-ha-networking-options.html#d6e7351)
+   - **[$multi_host]** Must be set to true. Establishes the [Nova multi-host networking model] (http://docs.openstack.org/trunk/openstack-compute/admin/content/existing-ha-networking-options.html#d6e7351)
    
-   - [$rabbit_addresses] List of Controller addresses used in nova.conf for RabbitMQ Mirrored Queueing
+   - **[$rabbit_addresses]** List of Controller addresses used in nova.conf for RabbitMQ Mirrored Queueing
    
-   - [$memcached_servers] List of Controller addresses in /etc/nova/nova.conf
+   - **[$memcached_servers]** List of Controller addresses in /etc/nova/nova.conf
      used for Nova Consoleauth redundancy
    
-   - [$swift_proxy_address] This should be the Virtual IP (VIP) address of your
+   - **[$swift_proxy_address]** This should be the Virtual IP (VIP) address of your
      Swift Proxy Nodes.
    
-   - [$mysql_puppet_password] The password for the puppet user of the PuppetMaster database.
+   - **[$mysql_puppet_password]** The password for the puppet user of the PuppetMaster database.
    
-   - [$horizon_secret_key] Used by the secret key generator of the horizon.utils.secret_key Module.  
+   - **[$horizon_secret_key]** Used by the secret key generator of the horizon.utils.secret_key Module.  
 	  
-   - [$cluster_rabbit] Keep setting as true. Enables/disables RabbitMQ clustering.
+   - **[$cluster_rabbit]** Keep setting as true. Enables/disables RabbitMQ clustering.
 	  
-   - [$rabbit_cluster_disk_nodes] Used to specify Controller Nodes that will be 
-	    used for RabbitMQ clustering.
+   - **[$rabbit_cluster_disk_nodes]** Used to specify Controller Nodes that will be used for RabbitMQ clustering.
   
-  * Import Section: imports other manifests from /etc/puppet/manifests/<manifest_name> into the site manifest.
+  * **Import Section:** imports other manifests from /etc/puppet/manifests/<manifest_name> into the site manifest.
   
-  * Node Base: Defines a base node that is imported into other node definitions, except the Build Node.
+  * **Node Base:** Defines a base node that is imported into other node definitions, except the Build Node.
 
-#### networking::interfaces
+####[networking::interfaces class](https://github.com/danehans/puppet-networking)
 
   This class manages the /etc/network/interfaces file for OpenStack HA Nodes. 
 
-##### Usage Example:
+* Usage Example:
 
-	 This class will configure networking parameters for OpenStack Nodes.
-	 This particular example configures networking for a Controller Node that uses VLAN 221
-	 for the Nova Instance (flat) network and collapses the public/management networks:
+ This class will configure networking parameters for OpenStack Nodes.
+ This particular example configures networking for a Controller Node that uses VLAN 221
+ for the Nova Instance (flat) network and collapses the public/management networks:
 
-  		    class { 'networking::interfaces':
-  		      node_type           => controller,
-  		      mgt_is_public       => true,
-  		      vlan_networking     => true,
-  		      vlan_interface      => "eth0",
-  		      mgt_interface       => "eth0",
-  		      mgt_ip              => "192.168.220.41",
-  		      mgt_gateway         => "192.168.220.1",
-  		      flat_vlan           => "221",
-  		      flat_ip             => "10.0.0.251",
-  		      dns_servers         => "192.168.220.254",
-  		      dns_search          => "dmz-pod2.lab",
-  		   }
+          class { 'networking::interfaces':
+  	    node_type           => controller,
+  	    mgt_is_public       => true,
+  	    vlan_networking     => true,
+  	    vlan_interface      => "eth0",
+  	    mgt_interface       => "eth0",
+  	    mgt_ip              => "192.168.220.41",
+  	    mgt_gateway         => "192.168.220.1",
+  	    flat_vlan           => "221",
+  	    flat_ip             => "10.0.0.251",
+  	    dns_servers         => "192.168.220.254",
+  	    dns_search          => "dmz-pod2.lab",
+  	  }
 
-	 For more information on the parameters, check out the inline documentation in the manifest:
+ For more information on the parameters, check out the inline documentation in the manifest:
 
-		<module_path>/networking/manifests/interfaces.pp
+  <module_path>/networking/manifests/interfaces.pp
 
 
-#### galera
+####[galera class](https://github.com/danehans/puppet-galera/blob/master/manifests/init.pp)
 
-  * This class manages MySQL Galera on Controller Nodes.  Galera is used to provide multi-master
-    redundancy and scalability of the Controller Node MySQL databases.
+  This class manages MySQL Galera on Controller Nodes.  Galera is used to provide multi-master
+  redundancy and scalability of the Controller Node MySQL databases.
 
-##### Usage Example:
+* Usage Example:
 
-  * This class will manage Galera on the 1st Controller in the Controller cluster.  
-    Make sure to uncomment master_ip after the 2nd Controller Node is deployed
-    and the Galera cluster is sync'ed.  
+  This class will manage Galera on the 1st Controller in the Controller cluster.  
+  Make sure to uncomment **master_ip** after the 2nd Controller Node is deployed
+  and the Galera cluster is sync'ed.  
 
-  * For the 2nd and 3rd Controllers, make sure the master_ip is $controller_node_primary:
+  For the 2nd and 3rd Controllers, make sure the master_ip is $controller_node_primary:
 
      	class { 'galera' :
      	   cluster_name            => 'openstack',
      	   #master_ip               => $controller_node_secondary,
 
-  *	You can verify if the database is sync'ed by using the following mysql command:
+  You can verify if the database is sync'ed by using the following mysql command:
 
         mysql> show status like 'wsrep%';
 
-  * For more information on the parameters, check out the inline documentation in the manifest:
+  For more information on the parameters, check out the inline documentation in the manifest:
 
 	<module_path>/galera/manifests/init.pp
 
-#### galera::haproxy
+####[galera::haproxy class](https://github.com/danehans/puppet-galera/blob/master/manifests/haproxy.pp)
 
-	  * This class adds a service user account to the database
-	    that allows HAProxy to monitor the database cluster health.
-	    Note: If you change the user account information, you need to also change
-	    the 'mysql-check user' for the haproxy::config galera definition.
+ This class adds a service user account to the database
+ that allows HAProxy to monitor the database cluster health.
+ **Note:** If you change the user account information, you need to also change
+ the **mysql-check user** for the haproxy::config galera definition.
 
-##### Usage Example:
+* Usage Example:
 
-	  * This is a simple class to use:
+  This is a simple class to use:
 
     		class {'galera::haproxy': }
 
-	  * If needed, you can define account credentials for the service account. 
-	    For more information on the parameters, check out the inline documentation in the manifest:
+  If needed, you can define account credentials for the service account. 
+  For more information on the parameters, check out the inline documentation in the manifest:
 
-		<module_path>/galera/manifests/haproxy.pp
+      <module_path>/galera/manifests/haproxy.pp
 		
-#### openstack::controller
+####[openstack::controller](https://github.com/danehans/puppet-openstack/blob/master/manifests/controller.pp)
 
 The openstack::controller class is intended to provide support for
 HA OpenStack deployments.  The module focuses on the Nova, Keystone,
@@ -400,7 +397,7 @@ The openstack::controller class deploys the following OpenStack services:
   * mysql
   * rabbitmq
 
-##### Usage Example:
+* Usage Example:
 
   An Openstack Controller class is configured as follows:
 
@@ -442,7 +439,7 @@ The openstack::controller class deploys the following OpenStack services:
 
     <module_path>/openstack/manifests/controller.pp
 
-#### openstack::compute
+####[openstack::compute class](https://github.com/danehans/puppet-openstack/blob/master/manifests/compute.pp)
 
 The Openstack compute class is used to manage Nova Compute Nodes.  A
 typical Openstack HA installation would consist of at least 3 Controller
@@ -450,42 +447,42 @@ Nodes and a large number of Compute Nodes (based on the amount of resources bein
 
 The openstack::compute class deploys the following services:
   * nova
-      - nova-compute (libvirt backend)
-      - nova-network service (multi_host must be enabled)
-      - nova-api service (multi_host must be enabled)
-      - nova-volume 
+    - nova-compute (libvirt backend)
+    - nova-network service (multi_host must be enabled)
+    - nova-api service (multi_host must be enabled)
+    - nova-volume 
 
-##### Usage Example:
+* Usage Example:
 
   An OpenStack Compute class can be configured as follows:
 
-           class { 'openstack::compute':
-        	    public_interface   => $public_interface,
-        	    private_interface  => $private_interface,
-        	    internal_address   => $internal_address,
-        	    virtual_address    => $controller_node_address,
-        	    libvirt_type       => 'kvm',
-        	    fixed_range        => $fixed_network_range,
-        	    network_manager    => 'nova.network.manager.FlatDHCPManager',
-        	    multi_host         => $multi_host,
-        	    nova_user_password => $nova_user_password,
-        	    nova_db_password   => $nova_db_password,
-        	    rabbit_password    => $rabbit_password,
-        	    rabbit_user        => $rabbit_user,
-        	    api_bind_address   => $internal_address,    
-        	    vncproxy_host      => $controller_node_address,
-        	    vnc_enabled        => 'true',
-        	    verbose            => $verbose,
-        	    manage_volumes     => true,
-        	    nova_volume        => 'nova-volumes',
-        	  }
+         class { 'openstack::compute':
+           public_interface   => $public_interface,
+           private_interface  => $private_interface,
+           internal_address   => $internal_address,
+           virtual_address    => $controller_node_address,
+           libvirt_type       => 'kvm',
+           fixed_range        => $fixed_network_range,
+           network_manager    => 'nova.network.manager.FlatDHCPManager',
+           multi_host         => $multi_host,
+           nova_user_password => $nova_user_password,
+           nova_db_password   => $nova_db_password,
+           rabbit_password    => $rabbit_password,
+           rabbit_user        => $rabbit_user,
+           api_bind_address   => $internal_address,    
+           vncproxy_host      => $controller_node_address,
+           vnc_enabled        => 'true',
+           verbose            => $verbose,
+           manage_volumes     => true,
+           nova_volume        => 'nova-volumes',
+         }
 
   For more information on the parameters, check out the inline documentation in
   the manifest:
 
     <module_path>/openstack/manifests/compute.pp
 
-### Customizing Manifests
+###Customizing Manifests
 
 So far, classes have been discussed as configuration interfaces used to deploy
 the OpenStack roles. This section explains how to apply these roles to actual
@@ -515,62 +512,63 @@ applied to those specified nodes. Resources specified at top-scope are applied
 to all nodes.
 
 ## Deploying HAProxy Load-Balancers
+
 The servers that act as your load-balancers should be managed by Cobbler.  
 Make sure you your cobbler-node manifest is properly configured and you have added
 node definitions for your two load-balancers nodes.  Here is an example:
 
-              cobbler::node { "slb01":
-              	 mac => "A4:4C:11:13:44:93",
-              	 profile => "precise-x86_64-auto",
-              	 domain => "dmz-pod2.lab",
-              	 preseed => "/etc/cobbler/preseeds/cisco-preseed",
-              	 power_address => "192.168.220.8",
-              	 power_type => "ipmitool",
-              	 power_user => "admin",
-              	 power_password => "password",
-              }
+        cobbler::node { "slb01":
+          mac => "A4:4C:11:13:44:93",
+          profile => "precise-x86_64-auto",
+          domain => "dmz-pod2.lab",
+          preseed => "/etc/cobbler/preseeds/cisco-preseed",
+          power_address => "192.168.220.8",
+          power_type => "ipmitool",
+          power_user => "admin",
+          power_password => "password",
+        }
               	
-              cobbler::node { "slb02":
-              	 mac => "A4:4C:11:13:BA:17",
-              	 profile => "precise-x86_64-auto",
-              	 domain => "dmz-pod2.lab",
-              	 preseed => "/etc/cobbler/preseeds/cisco-preseed",
-              	 power_address => "192.168.220.10",
-              	 power_type => "ipmitool",
-              	 power_user => "admin",
-              	 power_password => "password",
-              }
+        cobbler::node { "slb02":
+          mac => "A4:4C:11:13:BA:17",
+          profile => "precise-x86_64-auto",
+          domain => "dmz-pod2.lab",
+          preseed => "/etc/cobbler/preseeds/cisco-preseed",
+          power_address => "192.168.220.10",
+          power_type => "ipmitool",
+          power_user => "admin",
+          power_password => "password",
+        }
 
 puppet apply the site.pp file to add the nodes to Cobbler:
 	
-            	puppet apply /etc/puppet/manifests/site.pp -v
+          puppet apply /etc/puppet/manifests/site.pp -v
 
 Verify that the nodes have been added to Cobbler
 	
-            	cobbler system list
+          cobbler system list
 
 Next, edit the node definitions and network settings in /etc/puppet/manifests/haproxy-nodes.pp.  Replace <SLB-01> and <SLB-02> 
 with the hostname/certname of your load-balancer nodes.
 	
-                     	vi /etc/puppet/manifests/haproxy-nodes.pp
+          vi /etc/puppet/manifests/haproxy-nodes.pp
                      	
-                     	node /<SLB-01>/
+          node /<SLB-01>/
                      	
-                     	node /<SLB-02>/
+          node /<SLB-02>/
                      	
-                       	class { 'networking::interfaces':
-                       	  node_type           => load-balancer,
-                           mgt_is_public       => true,
-                           mgt_interface       => "eth0",
-                           mgt_ip              => "192.168.220.62",
-                           mgt_gateway         => "192.168.220.1",
-                           dns_servers         => "192.168.220.254",
-                           dns_search          => "dmz-pod2.lab",
-                         }
+          class { 'networking::interfaces':
+            node_type           => load-balancer,
+            mgt_is_public       => true,
+            mgt_interface       => "eth0",
+            mgt_ip              => "192.168.220.62",
+            mgt_gateway         => "192.168.220.1",
+            dns_servers         => "192.168.220.254",
+            dns_search          => "dmz-pod2.lab",
+          }
 
 Lastly, run puppet on the load-balancer nodes
 
-                    	puppet agent -t -d
+          puppet agent -t -d
 
 ## Deploying Swift
 
@@ -631,10 +629,10 @@ with the hostname/certname of your Swift Storage and Proxy Nodes.
      	      dns_search          => "dmz-pod2.lab",
      	    }
 
-Note: Do not define the 2nd Swift Proxy until the storage Nodes and first proxy 
+**Note:** Do not define the 2nd Swift Proxy until the storage Nodes and first proxy 
 are deployed and the ring is established.  Also, add additional Storage Node definitions as needed.
 		
-Note: You must use at least 3 Storage Nodes to create a Swift ring.  
+**Note:** You must use at least 3 Storage Nodes to create a Swift ring.  
 
 This swift configuration requires both a puppetmaster with storeconfigs enabled.
 
