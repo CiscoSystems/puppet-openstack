@@ -769,20 +769,20 @@ openstack command line utilities.
 
 3. Verify Keystone is operational:
 
-      	# service keystone status
+      	service keystone status
 
 4. Ensure the Keystone Service Endpoints have been properly configured:
 
-      	# keystone endpoint-list
+      	keystone endpoint-list
 
 5. Verify glance is operational:
 
-       	# service glance-api status
-      	# service glance-registry status
+       	service glance-api status
+      	service glance-registry status
 
 6. Verify that all of the Nova services on all Nodes are operational:
 
-         # nova-manage service list
+         nova-manage service list
          Binary           Host          Zone   Status     State Updated_At
          nova-volume      <your_host>   nova   enabled    :-)   2012-06-06 22:30:05
          nova-consoleauth <your_host>   nova   enabled    :-)   2012-06-06 22:30:04
@@ -793,9 +793,9 @@ openstack command line utilities.
 
 7. Add an image to Glance.  This example uses an Ubuntu Precise image:
 
-       	# wget http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img
+       	wget http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img
        	
-        # glance add name="precise" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
+        glance add name="precise" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
 
 
 8. Connect to the Horizon Virtual IP address (OpenStack Dashboard) through a web browser:
