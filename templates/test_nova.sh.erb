@@ -32,7 +32,7 @@ login_user='ubuntu'
 ssh-keygen -f /tmp/id_rsa -t rsa -N ''
 
 #add the public key to nova.
-nova keypair-add --pub_key /tmp/id_rsa.pub key_cirros
+nova keypair-add --pub_key /tmp/id_rsa.pub admin_key
 
 <% if floating_ip -%>
 # create a security group so that we can allow ssh, http, and ping traffic
