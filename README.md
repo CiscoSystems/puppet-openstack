@@ -807,12 +807,9 @@ openstack command line utilities.
          nova-network     <your_host>   nova   enabled    :-)   2012-06-06 22:30:07
          nova-cert        <your_host>   nova   enabled    :-)   2012-06-06 22:30:04
 
-7. Add an image to Glance.  This example uses an Ubuntu Precise image:
+7. Run the nova_test script from the Controller that has the openstack::test_file class (Control1 by default):
 
-       	wget http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img
-       	
-        glance add name="precise" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
-
+        . /tmp/test_nova.sh
 
 8. Connect to the Horizon Virtual IP address (OpenStack Dashboard) through a web browser:
 
