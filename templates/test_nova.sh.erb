@@ -21,9 +21,9 @@ login_user='cirros'
 # feature-full and realistic
 wget http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img
 # import that image into glance
-glance add name="precise-amd64" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
+glance add name="precise" is_public=true container_format=ovf disk_format=qcow2 < precise-server-cloudimg-amd64-disk1.img
 # Caputre the Image ID so taht we can call the right UUID for this image
-IMAGE_ID=`glance index | grep 'precise-amd64' | head -1 |  awk -F' ' '{print $1}'`
+IMAGE_ID=`glance index | grep 'precise' | head -1 |  awk -F' ' '{print $1}'`
 
 login_user='ubuntu'
 <% end -%>
