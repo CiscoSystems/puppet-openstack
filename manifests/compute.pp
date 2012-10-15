@@ -68,7 +68,51 @@ class openstack::compute(
   $verbose             = false,
   $manage_volumes      = false,
   $nova_volume         = 'nova-volumes',
-  $prevent_db_sync     = true
+  $prevent_db_sync     = true,
+  # quantum config
+  $network_api_class       = 'nova.network.quantumv2.api.API',
+  $quantum_url             = 'http://172.29.74.194:9696',
+  $quantum_auth_strategy   = 'keystone',
+  $quantum_admin_tenant_name    = 'services',
+  $quantum_admin_username       = 'quantum',
+  $quantum_admin_password       = 'quantum',
+  $quantum_admin_auth_url       = 'http://172.29.74.194:35357/v2.0',
+  $libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtOpenVswitchDriver',
+  $libvirt_use_virtio_for_bridges       = 'True',
+  $host         = 'compute',
+#quantum general
+  $quantum_enabled              = true,
+  $quantum_package_ensure       = present,
+  $quantum_log_verbose          = "False",
+  $quantum_log_debug            = "False",
+  $quantum_bind_host            = "0.0.0.0",
+  $quantum_bind_port            = "9696",
+  $quantum_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum",
+  $quantum_auth_host            = "172.29.74.194",
+  $quantum_auth_port            = "35357",
+  $quantum_rabbit_host          = "172.29.74.194",
+  $quantum_rabbit_port          = "5672",
+  $quantum_rabbit_user          = "quantum",
+  $quantum_rabbit_password      = "quantum",
+  $quantum_rabbit_virtual_host  = "/quantum",
+  $quantum_control_exchange     = "quantum",
+  $quantum_core_plugin            = "quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2",
+  $quantum_mac_generation_retries = 16,
+  $quantum_dhcp_lease_duration    = 120,
+#quantum ovs
+  $ovs_bridge_uplinks      = ['br-ex:eth0.40'],
+  $ovs_bridge_mappings      = ['default:br-ex'],
+  $ovs_tenant_network_type  = "vlan",
+  $ovs_network_vlan_ranges  = "default:1000:2000",
+  $ovs_integration_bridge   = "br-int",
+  $ovs_enable_tunneling    = "False",
+  $ovs_tunnel_bridge        = "br-tun",
+  $ovs_tunnel_id_ranges     = "1:1000",
+  $ovs_local_ip             = "10.0.0.1",
+  $ovs_server               = false,
+  $ovs_root_helper          = "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
+  $ovs_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum"
+
 ) {
 
   class { 'nova':
@@ -133,7 +177,58 @@ class openstack::compute(
     create_networks   => false,
     enabled           => $enable_network_service,
     install_service   => $enable_network_service,
+    network_api_class	=> $network_api_class,
+    quantum_url => $quantum_url,
+    quantum_auth_strategy => $quantum_auth_strategy,
+    quantum_admin_tenant_name => $quantum_admin_tenant_name,
+    quantum_admin_username => $quantum_admin_username,
+    quantum_admin_password => $quantum_admin_password,
+    quantum_admin_auth_url => $quantum_admin_auth_url,
+    libvirt_vif_driver => $libvirt_vif_driver,
+    libvirt_use_virtio_for_bridges => $libvirt_use_virtio_for_bridges, 
   }
+
+  class { "quantum":
+    enabled              => $quantum_enabled, 
+    package_ensure       => $quantum_package_ensure, 
+    log_verbose          => $quantum_log_verbose,
+    log_debug            => $quantum_log_debug,
+    bind_host            => $quantum_bind_host,
+    bind_port            => $quantum_bind_port,
+    sql_connection       => $quantum_sql_connection,
+    auth_type            => $quantum_auth_strategy,
+    auth_host            => $quantum_auth_host,
+    auth_port            => $quantum_auth_port,
+    auth_uri             => $quantum_admin_auth_url,
+    keystone_tenant      => $quantum_admin_tenant_name,
+    keystone_user        => $quantum_admin_username,
+    keystone_password    => $quantum_admin_password,
+    rabbit_host          => $quantum_rabbit_host,
+    rabbit_port          => $quantum_rabbit_port,
+    rabbit_user          => $quantum_rabbit_user,
+    rabbit_password      => $quantum_rabbit_password,
+    rabbit_virtual_host  => $quantum_rabbit_virtual_host,
+    control_exchange     => $quantum_control_exchange,
+    core_plugin            => $quantum_core_plugin,
+    mac_generation_retries => $quantum_mac_generation_retries,
+    dhcp_lease_duration    => $quantum_dhcp_lease_duration,
+  }
+
+  class { "quantum::plugins::ovs":
+    bridge_uplinks      => $ovs_bridge_uplinks, 
+    bridge_mappings      => $ovs_bridge_mappings,
+    tenant_network_type  => $ovs_tenant_network_type,
+    network_vlan_ranges  => $ovs_network_vlan_ranges,
+    integration_bridge   => $ovs_integration_bridge,
+    enable_tunneling    => $ovs_enable_tunneling,
+    tunnel_bridge        => $ovs_tunnel_bridge,
+    tunnel_id_ranges     => $ovs_tunnel_id_ranges,
+    local_ip             => $ovs_local_ip,
+    server               => $ovs_server,
+    root_helper          => $ovs_root_helper,
+    sql_connection       => $ovs_sql_connection,
+  }
+
 
   if $manage_volumes {
 
