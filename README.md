@@ -71,18 +71,23 @@ These modules are based on the administrative guides for OpenStack
   The OpenStack HA solution consists of 5 Nodes Types:
 
   * Load Balancer Node
+       - Quantity- 2
        - Runs HAProxy and Keeplived. 
        - Provides monitoring and fail-over for API endpoints and between load-balancer nodes.  
   * Controller Node
+       - Quantity- 3
        - Runs MySQL Galera, Keystone, Glance, Nova, Horizon, and RabbitMQ.
        - Provides control plane functionality for managing the OpenStack Nova environment.  
   * Compute Node
+       - Quantity- 1 (recommend having 2 for demonstrating nova-scheduler across multiple nodes)
        - Runs the following Nova services: api, compute, network, and volume.
        - Provides necessary infrastructure services to Nova Instances.  
   * Swift Proxy Node
+       - Quantity- 2
        - Runs swift-proxy, memcached, and keystone-client.
        - Authenticates users against Keystone and acts as a translation layer between clients and storage.  
   * Swift Storage Node
+       - Quantity- 3
        - Runs Swift account/container/object services.  XFS is used as the filesystem.
        - Controls storage of the account databases, container databases, and the stored objects.
 
