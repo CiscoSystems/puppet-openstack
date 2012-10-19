@@ -150,23 +150,8 @@ These modules are based on the administrative guides for OpenStack
         cd <module_path>
         git clone git://github.com/danehans/puppet-openstack openstack
         cd openstack
+        git checkout -t -b essex-ha remotes/origin/essex-ha
         rake modules:clone
-
-  * For the Nova module, change to the rmq-ha branch
-
-        cd nova
-
-  * Then go: 
-
-        git checkout -t -b rmq-ha remotes/origin/rmq-ha
-
-  * For the RabbitMQ module, change to the cluster-support branch
-  
-        cd rabbitmq
-
-  * Then go:
-
-        git checkout -t -b rmq-ha remotes/origin/cluster-support
 
   * Copy the example OpenStack HA manifests to your manifests directory:
 
