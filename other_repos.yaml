@@ -43,6 +43,9 @@ repos:
     https://github.com/CiscoSystems/puppet-collectd: collectd
     https://github.com/danehans/puppet-statsd: statsd
 checkout_branches:
-#  keystone: dev
-#  glance: dev
-#    nova: dev
+  keystone: essex-ha
+  glance: essex-ha
+  nova: essex-ha
+  horizon: essex-ha
+  galera: essex-ha
+  rabbitmq: essex-ha
