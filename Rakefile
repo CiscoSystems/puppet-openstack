@@ -33,7 +33,7 @@ namespace :modules do
     end
     branches_to_checkout.each do |local, branch|
       Dir.chdir(File.join(modulepath, local)) do
-        output = `git checkout #{branch}`
+        output = `git checkout -t -b #{branch} remotes/origin/#{branch}`
       end
       # Puppet.debug(output)
     end

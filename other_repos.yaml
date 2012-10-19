@@ -2,6 +2,7 @@
 repos:
   repo_paths:
     # Core OpenStack Repos
+    #https://github.com/danehans/puppet-openstack: openstack
     https://github.com/danehans/puppetlabs-nova: nova
     https://github.com/danehans/puppetlabs-glance: glance
     https://github.com/danehans/puppetlabs-keystone: keystone
@@ -35,12 +36,13 @@ repos:
     https://github.com/CiscoSystems/puppet-dnsmasq: dnsmasq
     https://github.com/CiscoSystems/puppet-apt-cacher-ng: apt-cacher-ng
     https://github.com/puppetlabs/puppetlabs-https: git
-  checkout_branches:
-    keystone: essex-ha
-    glance: essex-ha
-    nova: essex-ha
-    horizon: essex-ha
-    haproxy: essex-ha
-    keepalived: essex-ha
-    rabbitmq: essex-ha
-    galera: essex-ha
+    # Optional Repos
+    https://github.com/CiscoSystems/puppet-horizion-branding: branding
+    https://github.com/CiscoSystems/puppet-graphite: graphite
+    https://github.com/CiscoSystems/puppet-nagios: nagios
+    https://github.com/CiscoSystems/puppet-collectd: collectd
+    https://github.com/danehans/puppet-statsd: statsd
+checkout_branches:
+#  keystone: dev
+#  glance: dev
+#    nova: dev
