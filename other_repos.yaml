@@ -2,46 +2,46 @@
 repos:
   repo_paths:
     # Core OpenStack Repos
-    #https://github.com/danehans/puppet-openstack: openstack
-    https://github.com/danehans/puppetlabs-nova: nova
-    https://github.com/danehans/puppetlabs-glance: glance
-    https://github.com/danehans/puppetlabs-keystone: keystone
-    https://github.com/danehans/puppetlabs-horizon: horizon
-    https://github.com/CiscoSystems/puppet-swift: swift
+    #git://github.com/danehans/puppet-openstack: openstack
+    git://github.com/danehans/puppetlabs-nova: nova
+    git://github.com/danehans/puppetlabs-glance: glance
+    git://github.com/danehans/puppetlabs-keystone: keystone
+    git://github.com/danehans/puppetlabs-horizon: horizon
+    git://github.com/CiscoSystems/puppet-swift: swift
     # OpenStack Middleware Repos
-    https://github.com/danehans/puppetlabs-rabbitmq: rabbitmq
-    https://github.com/CiscoSystems/puppet-mysql: mysql
-    https://github.com/danehans/puppet-galera: galera
-    https://github.com/puppetlabs/puppetlabs-vcsrepo: vcsrepo
-    https://github.com/CiscoSystems/puppet-memcached: memcached
-    https://github.com/CiscoSystems/puppet-rsync: rsync
-    https://github.com/CiscoSystems/puppet-apache: apache
+    git://github.com/danehans/puppetlabs-rabbitmq: rabbitmq
+    git://github.com/CiscoSystems/puppet-mysql: mysql
+    git://github.com/danehans/puppet-galera: galera
+    git://github.com/puppetlabs/puppetlabs-vcsrepo: vcsrepo
+    git://github.com/CiscoSystems/puppet-memcached: memcached
+    git://github.com/CiscoSystems/puppet-rsync: rsync
+    git://github.com/CiscoSystems/puppet-apache: apache
     # Foundational Repos
-    https://github.com/CiscoSystems/puppet-xinetd: xinetd
-    https://github.com/CiscoSystems/puppet-ssh: ssh
-    https://github.com/CiscoSystems/puppet-stdlib: stdlib
-    https://github.com/CiscoSystems/puppet-apt: apt
-    https://github.com/CiscoSystems/puppet-concat: concat
-    https://github.com/CiscoSystems/puppet-create_resources: create_resources
-    https://github.com/CiscoSystems/puppet-sysctl: sysctl
-    https://github.com/danehans/puppet-networking: networking
-    https://github.com/danehans/puppet-module-keepalived: keepalived
-    https://github.com/danehans/puppet-haproxy: haproxy
-    https://github.com/CiscoSystems/cisco-openstack-docs: os-docs
+    git://github.com/CiscoSystems/puppet-xinetd: xinetd
+    git://github.com/CiscoSystems/puppet-ssh: ssh
+    git://github.com/CiscoSystems/puppet-stdlib: stdlib
+    git://github.com/CiscoSystems/puppet-apt: apt
+    git://github.com/CiscoSystems/puppet-concat: concat
+    git://github.com/CiscoSystems/puppet-create_resources: create_resources
+    git://github.com/CiscoSystems/puppet-sysctl: sysctl
+    git://github.com/danehans/puppet-networking: networking
+    git://github.com/danehans/puppet-module-keepalived: keepalived
+    git://github.com/danehans/puppet-haproxy: haproxy
+    git://github.com/CiscoSystems/cisco-openstack-docs: os-docs
     # Build Node Repos
-    https://github.com/CiscoSystems/puppetlabs-lvm: lvm
-    https://github.com/CiscoSystems/puppet-ntp: ntp
-    https://github.com/CiscoSystems/puppet-puppet: puppet
-    https://github.com/danehans/puppet-cobbler: cobbler
-    https://github.com/CiscoSystems/puppet-dnsmasq: dnsmasq
-    https://github.com/CiscoSystems/puppet-apt-cacher-ng: apt-cacher-ng
-    https://github.com/puppetlabs/puppetlabs-https: git
+    git://github.com/CiscoSystems/puppetlabs-lvm: lvm
+    git://github.com/CiscoSystems/puppet-ntp: ntp
+    git://github.com/CiscoSystems/puppet-puppet: puppet
+    git://github.com/danehans/puppet-cobbler: cobbler
+    git://github.com/CiscoSystems/puppet-dnsmasq: dnsmasq
+    git://github.com/CiscoSystems/puppet-apt-cacher-ng: apt-cacher-ng
+    git://github.com/puppetlabs/puppetlabs-git: git
     # Optional Repos
-    https://github.com/CiscoSystems/puppet-horizion-branding: branding
-    https://github.com/CiscoSystems/puppet-graphite: graphite
-    https://github.com/CiscoSystems/puppet-nagios: nagios
-    https://github.com/CiscoSystems/puppet-collectd: collectd
-    https://github.com/danehans/puppet-statsd: statsd
+    git://github.com/CiscoSystems/puppet-horizion-branding: branding
+    git://github.com/CiscoSystems/puppet-graphite: graphite
+    git://github.com/CiscoSystems/puppet-nagios: nagios
+    git://github.com/CiscoSystems/puppet-collectd: collectd
+    git://github.com/danehans/puppet-statsd: statsd
 checkout_branches:
   keystone: essex-ha
   glance: essex-ha
