@@ -69,6 +69,7 @@ class openstack::controller(
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
   $rabbit_password         = 'rabbit_pw',
+  $rabbit_ha               = true,
   $rabbit_user             = 'nova',
   $rabbit_addresses        = [$controller_node_primary, $controller_node_secondary,$controller_node_tertiary],
   $cluster_rabbit          = false,
@@ -359,5 +360,29 @@ class openstack::controller(
 
 
   ######## End Horizon #####
+
+  ######## Begin RabbitMQ ##########
+
+  # Pin Rabbit Repo
+  if $rabbit_ha {
+  # Load RabbitMQ Apt Repo for 2.8.7-1 needed for HA
+  apt::source { 'rabbitmq_server':
+    location          => 'http://www.rabbitmq.com/debian/',
+    release           => 'testing',
+    key              => '1024D/056E8E56',
+    key_source        => 'http://www.rabbitmq.com/rabbitmq-signing-key-public.asc',
+  }
+
+  # an apt-get update is usually required to ensure that
+  # we get the latest version of packages
+  exec { '/usr/bin/apt-get update':
+    require     => Class['apt'],
+    refreshonly => true,
+    subscribe   => [Class['apt'], Apt::Source['rabbitmq_server']],
+    logoutput   => true,
+  }
+ }
+
+  ######## End RabbitMQ ##########
 
 }
