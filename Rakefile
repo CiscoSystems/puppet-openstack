@@ -7,7 +7,6 @@
 
 begin
   require 'yaml'
-  require 'puppetlabs_spec_helper/rake_tasks'
 rescue LoadError
   puts "!!!!!"
   puts "puppetlabs_spec_helper not found. This may cause some rake tasks to be unavailable."
