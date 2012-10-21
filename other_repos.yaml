@@ -40,7 +40,7 @@ repos:
     git://github.com/CiscoSystems/puppet-horizion-branding: branding
     git://github.com/CiscoSystems/puppet-graphite: graphite
     git://github.com/CiscoSystems/puppet-nagios: nagios
-    git://github.com/CiscoSystems/puppet-collectd: collectd
+    git://github.com/danehans/puppet-collectd: collectd
     git://github.com/danehans/puppet-statsd: statsd
   checkout_branches:
     keystone: essex-ha
@@ -49,3 +49,4 @@ repos:
     horizon: essex-ha
     galera: essex-ha
     rabbitmq: essex-ha
+    collectd: patch-1
