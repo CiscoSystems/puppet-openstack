@@ -20,6 +20,7 @@
 #   Optional. Defaults to false.
 # [network_config] Hash that can be used to pass implementation specifc
 #   network settings. Optioal. Defaults to {}
+# [auto_assign_floating_ip] Rather configured to automatically allocate and 
 # [sql_connection] SQL connection information. Optional. Defaults to false
 #   which indicates that exported resources will be used to determine connection
 #   information.
@@ -54,6 +55,7 @@ class openstack::compute(
   $network_manager     = 'nova.network.manager.FlatDHCPManager',
   $multi_host          = false,
   $network_config      = {},
+  $auto_assign_floating_ip = false,
   $api_bind_address    = '0.0.0.0',
   $nova_user_password  = 'nova_pass',
   #$rabbit_addresses,
@@ -156,6 +158,10 @@ class openstack::compute(
     create_networks   => false,
     enabled           => $enable_network_service,
     install_service   => $enable_network_service,
+  }
+
+  if $auto_assign_floating_ip {
+  nova_config { 'auto_assign_floating_ip':   value => 'True'; }
   }
 
   if $manage_volumes {
