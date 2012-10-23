@@ -207,8 +207,14 @@ node /control01/ inherits base {
     address  => $swift_proxy_address,
   }
 
-  #Needed to address a nova-consoleauth limitation for HA - bug has been filed
+  # Needed to address a nova-consoleauth limitation for HA - bug has been filed
   class { 'nova::consoleauth::ha_patch': }
+
+  # Deploys a script to test nova
+  class { 'openstack::test_file': }
+
+  # Deploys Cisco Horizon Skin
+  class { 'branding': }
 
 }
 
@@ -263,6 +269,7 @@ node /control02/ inherits base {
     cache_server_ip         => $internal_address,   
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
+    rabbit_addresses        => [$controller_node_secondary, $controller_node_primary, $controller_node_tertiary],
     cluster_rabbit          => $cluster_rabbit,
     cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
     api_bind_address        => $internal_address,
@@ -277,6 +284,9 @@ node /control02/ inherits base {
 
   #Needed to address a nova-consoleauth limitation for HA - bug has been filed
   class { 'nova::consoleauth::ha_patch': }
+
+  # Deploy Cisco Horizon Skin
+  class { 'branding': }
 
 }
 
@@ -331,6 +341,7 @@ node /control03/ inherits base {
     cache_server_ip         => $internal_address,   
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
+    rabbit_addresses        => [$controller_node_tertiary, $controller_node_secondary, $controller_node_primary],
     cluster_rabbit          => $cluster_rabbit,
     cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
     api_bind_address        => $internal_address,
@@ -345,6 +356,9 @@ node /control03/ inherits base {
 
   #Needed to address a nova-consoleauth limitation for HA - bug has been filed
   class { 'nova::consoleauth::ha_patch': }
+
+  # Deploy Cisco Horizon Skin
+  class { 'branding': }
 
 }
 
@@ -374,24 +388,25 @@ node /compute01/ inherits base {
   }
 
   class { 'openstack::compute':
-    public_interface   => $public_interface,
-    private_interface  => $private_interface,
-    internal_address   => $internal_address,
-    virtual_address    => $controller_node_address,
-    libvirt_type       => 'kvm',
-    fixed_range        => $fixed_network_range,
-    network_manager    => 'nova.network.manager.FlatDHCPManager',
-    multi_host         => $multi_host,
-    nova_user_password => $nova_user_password,
-    nova_db_password   => $nova_db_password,
-    rabbit_password    => $rabbit_password,
-    rabbit_user        => $rabbit_user,
-    api_bind_address   => $internal_address,    
-    vncproxy_host      => $controller_node_address,
-    vnc_enabled        => 'true',
-    verbose            => $verbose,
-    manage_volumes     => true,
-    nova_volume        => 'nova-volumes',
+    public_interface        => $public_interface,
+    private_interface       => $private_interface,
+    internal_address        => $internal_address,
+    virtual_address         => $controller_node_address,
+    libvirt_type            => 'kvm',
+    fixed_range             => $fixed_network_range,
+    network_manager         => 'nova.network.manager.FlatDHCPManager',
+    multi_host              => $multi_host,
+    auto_assign_floating_ip => $auto_assign_floating_ip,
+    nova_user_password      => $nova_user_password,
+    nova_db_password        => $nova_db_password,
+    rabbit_password         => $rabbit_password,
+    rabbit_user             => $rabbit_user,
+    api_bind_address        => $internal_address,    
+    vncproxy_host           => $controller_node_address,
+    vnc_enabled             => 'true',
+    verbose                 => $verbose,
+    manage_volumes          => true,
+    nova_volume             => 'nova-volumes',
   }
 }
 

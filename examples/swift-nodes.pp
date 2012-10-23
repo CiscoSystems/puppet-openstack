@@ -23,7 +23,7 @@
 # Top-level Swift Configuration Parameters
 $swift_user_password     = 'swift_pass'
 $swift_shared_secret     = 'Gdr8ny7YyWqy2'
-$swift_local_net_ip      = $ipaddress_eth0
+$swift_local_net_ip      = $ipaddress_eth0_221
 $swift_memcache_servers  = ['192.168.220.52:11211,192.168.220.53:11211']
 
 # configurations that need to be applied to all swift nodes
