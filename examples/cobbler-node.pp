@@ -46,7 +46,7 @@ node /cobbler-node/ {
 
  # This will build a preseed file called 'cisco-preseed' in /etc/cobbler/preseeds/
  cobbler::ubuntu::preseed { "cisco-preseed":
-  packages => "gfs2-utils openssh-server vim vlan lvm2 ntp puppet ipmitool",
+  packages => "openssh-server vim vlan lvm2 ntp puppet ipmitool",
   ntp_server => "192.168.220.1",
   late_command => '
 sed -e "/logdir/ a pluginsync=true" -i /target/etc/puppet/puppet.conf ; \
