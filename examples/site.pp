@@ -424,7 +424,7 @@ node /build-os/ inherits "cobbler-node" {
   class { apt-cacher-ng:
     }
 
-# set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
+# set the right local puppet environment up.  This builds puppetmaster with storedconfigs (and a local mysql instance)
   class { puppet:
     run_master => true,
     mysql_password => $mysql_puppet_password,
