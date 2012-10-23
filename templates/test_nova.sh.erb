@@ -43,12 +43,17 @@ nova secgroup-add-rule nova_test tcp 80 80 0.0.0.0/0
 nova secgroup-add-rule nova_test icmp -1 -1 0.0.0.0/0
 
 # request a floating IP address, and extract the address from the results message
-floating_ip=`nova floating-ip-create | grep None | awk '{print $2}'`
+# floating_ip=`nova floating-ip-create | grep None | awk '{print $2}'`
+
+# initialize a network in quantum for use by VMs and assign it a non-routed subnet
+quantum net-create quantum_test
+quantum subnet-create quantum_test 10.0.0.0/24
+NET_ID=`quantum net-list | grep quantum_test | awk -F' ' '{ print $2 }'`
 <% end -%>
 
 instance_name='<%= image_type %>_test_vm'
 # Boot the added image against the "1" flavor which by default maps to a micro instance.  <% if floating_ip -%> Include the cirros_test group so our address will work when we add it later <% end %>
-nova boot --flavor 1 <% if floating_ip -%>--security_groups nova_test<% end %> --image ${IMAGE_ID} --key_name key_cirros $instance_name
+nova boot --flavor 1 --security_groups nova_test --nic net-id=${NET_ID} --image ${IMAGE_ID} --key_name key_cirros $instance_name
 
 # let the system catch up
 sleep <%= sleep_time %>
