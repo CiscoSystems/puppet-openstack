@@ -152,7 +152,8 @@ node /control01/ inherits base {
 
   class { 'galera' :
         cluster_name            => 'openstack',
-	# uncomment the master_ip parameter after the 2nd controller is operational. Make sure to recomment if you rebuild the node.
+	# Uncomment the master_ip parameter after the 2nd controller is operational. 
+        # Make sure to recomment master_ip if you rebuild the HA Controller cluster.
         #master_ip               => $controller_node_secondary,    
 }
 
