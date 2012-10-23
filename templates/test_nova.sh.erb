@@ -61,14 +61,14 @@ sleep <%= sleep_time %>
 # Show the state of the system we just requested.
 nova show $instance_name
 
-# wait for the server to boot
-sleep <%= sleep_time %>
+## wait for the server to boot
+#sleep <%= sleep_time %>
 
-<% if floating_ip -%>
-# Now add the floating IP we reserved earlier to the machine.
-nova add-floating-ip $instance_name $floating_ip
-# Wait  and then try to SSH to the node, leveraging the private key
-# we generated earlier.
-sleep <%= sleep_time %>
-ssh $login_user@$floating_ip -i /tmp/id_rsa
-<% end -%>
+#<% if floating_ip -%>
+## Now add the floating IP we reserved earlier to the machine.
+#nova add-floating-ip $instance_name $floating_ip
+## Wait  and then try to SSH to the node, leveraging the private key
+## we generated earlier.
+#sleep <%= sleep_time %>
+#ssh $login_user@$floating_ip -i /tmp/id_rsa
+#<% end -%>
