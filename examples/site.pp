@@ -122,7 +122,8 @@ import 'cobbler-node'
 import 'haproxy-nodes'
 
 # Zero-out storage node disks
-import 'clean-disk'
+# If used, copy clean_disk.sh from <module_path>/os-docs/examples to /etc/puppet/files
+#import 'clean-disk'
 
 #Common configuration for all node compute, controller, storage but puppet-master/cobbler
 node base {
