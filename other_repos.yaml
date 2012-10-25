@@ -7,7 +7,7 @@ repos:
     git://github.com/danehans/puppetlabs-glance: glance
     git://github.com/danehans/puppetlabs-keystone: keystone
     git://github.com/danehans/puppetlabs-horizon: horizon
-    git://github.com/CiscoSystems/puppet-swift: swift
+    git://github.com/danehans/puppet-swift: swift
     # OpenStack Middleware Repos
     git://github.com/danehans/puppetlabs-rabbitmq: rabbitmq
     git://github.com/CiscoSystems/puppet-mysql: mysql
