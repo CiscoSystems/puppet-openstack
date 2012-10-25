@@ -157,15 +157,6 @@ class swift-ucs-disk {
     byte_size => $byte_size,
     size => $size
   }
-
-
-  #filesystem { '/dev/mapper/nova--volumes-swift--lv--2':
-  # ensure => present,
-  # fs_type => 'xfs',
-  # require => Logical_volume['swift-lv-2'],
-  #}
-
-
 }
 
 class role_swift_storage {
@@ -226,7 +217,6 @@ class role_swift_storage {
     weight      => 1,
   }
 
-  # TODO should device be changed to volume
   @@ring_account_device { "${swift_local_net_ip}:6002/sdb":
     zone        => $swift_zone,
     weight      => 1,
