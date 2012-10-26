@@ -83,8 +83,8 @@ class openstack::compute(
 #quantum general
   $quantum_enabled              = true,
   $quantum_package_ensure       = present,
-  $quantum_log_verbose          = "False",
-  $quantum_log_debug            = "False",
+  $quantum_log_verbose          = "True",
+  $quantum_log_debug            = "True",
   $quantum_bind_host            = "0.0.0.0",
   $quantum_bind_port            = "9696",
   $quantum_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum",

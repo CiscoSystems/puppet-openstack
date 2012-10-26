@@ -108,8 +108,8 @@ class openstack::controller(
 #guantum general
   $quantum_enabled              = true,
   $qunatum_package_ensure       = present,
-  $quantum_log_verbose          = "False",
-  $quantum_log_debug            = "False",
+  $quantum_log_verbose          = "True",
+  $quantum_log_debug            = "True",
   $quantum_bind_host            = "0.0.0.0",
   $quantum_bind_port            = "9696",
   $quantum_sql_connection       = "mysql://quantum:quantum@localhost/quantum",
