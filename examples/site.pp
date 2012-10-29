@@ -84,11 +84,11 @@ $swiftproxy_vip_address        = '192.168.220.60'
 
 # The actual address and hostname of the primary swift proxy
 $swiftproxy_ip_primary       = '192.168.220.52'
-$swiftproxy_hostname_primary   = 'compute02'
+$swiftproxy_hostname_primary   = 'swiftproxy01'
 
 # The actual address and hostname of the secondary swift proxy
 $swiftproxy_ip_secondary     = '192.168.220.53'
-$swiftproxy_hostname_secondary = 'compute03'
+$swiftproxy_hostname_secondary = 'swiftproxy02'
 
 # /etc/hosts entries for the controller nodes
 host { $controller_hostname_primary:
