@@ -23,7 +23,20 @@
 # Top-level Swift Configuration Parameters
 $swift_user_password     = 'swift_pass'
 $swift_shared_secret     = 'Gdr8ny7YyWqy2'
+# External interface of Swift Proxy
+$swift_public_net_ip     = $ipaddress_eth0
+# Internal interface and VLAN used for Swift Nodes to communicate with one another
 $swift_local_net_ip      = $ipaddress_eth0_221
+$swift_storage_vlan      = '221'
+
+# Internal Storage Network definitions.  Create add'l variables for new hosts and ref them in node definition.
+$swiftproxy01_local_net_ip    = '192.168.221.52'
+$swiftproxy02_local_net_ip    = '192.168.221.53'
+$swift01_local_net_ip         = '192.168.221.71'
+$swift02_local_net_ip         = '192.168.221.72'
+$swift03_local_net_ip         = '192.168.221.73'
+
+#Memcache definitions used by Proxy Nodes
 $swift_memcache_servers  = ['192.168.220.52:11211,192.168.220.53:11211']
 
 # configurations that need to be applied to all swift nodes
@@ -36,7 +49,6 @@ node swift_base inherits base  {
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
   }
-
 }
 
 # The following specifies 3 swift storage nodes
@@ -51,17 +63,27 @@ node /swift01/ inherits swift_base {
    mgt_interface       => "eth0",
    mgt_ip              => "192.168.220.71",
    mgt_gateway         => "192.168.220.1",
-   storage_vlan        => "221",
-   storage_ip          => "192.168.221.71",
+   storage_vlan        => $swift_storage_vlan,
+   storage_ip          => $swift01_local_net_ip,
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
  }
 
+  # Include class to configure hard disks
   include swift-ucs-disk
+
+  # Specify the zone the storage node should reside in
   $swift_zone = 1
+
+  # Add storage devices to rings
   include role_swift_storage
 
+  # install all swift storage servers together
+  class { 'swift::storage::all':
+    storage_local_net_ip => $swift01_local_net_ip,
+  }
 }
+
 node /swift02/ inherits swift_base {
 
  # Configure /etc/network/interfaces file
@@ -73,16 +95,25 @@ node /swift02/ inherits swift_base {
    mgt_interface       => "eth0",
    mgt_ip              => "192.168.220.72",
    mgt_gateway         => "192.168.220.1",
-   storage_vlan        => "221",
-   storage_ip          => "192.168.221.72",
+   storage_vlan        => $swift_storage_vlan,
+   storage_ip          => $swift02_local_net_ip,
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
  }
 
+  # Include class to configure hard disks
   include swift-ucs-disk
+
+  # Specify the zone the storage node should reside in
   $swift_zone = 2
+
+  # Add storage devices to rings
   include role_swift_storage
 
+  # install all swift storage servers together
+  class { 'swift::storage::all':
+    storage_local_net_ip => $swift02_local_net_ip,
+  }
 }
 node /swift03/ inherits swift_base {
 
@@ -95,33 +126,33 @@ node /swift03/ inherits swift_base {
    mgt_interface       => "eth0",
    mgt_ip              => "192.168.220.73",
    mgt_gateway         => "192.168.220.1",
-   storage_vlan        => "221",
-   storage_ip          => "192.168.221.73",
+   storage_vlan        => $swift_storage_vlan,
+   storage_ip          => $swift03_local_net_ip,
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
  }
 
+  # Include class to configure hard disks
   include swift-ucs-disk
-  $swift_zone = 3
+
+  # Specify the zone the storage node should reside in
+  $swift_zone = 1
+
+  # Add storage devices to rings
   include role_swift_storage
 
+  # install all swift storage servers together
+  class { 'swift::storage::all':
+    storage_local_net_ip => $swift03_local_net_ip,
+  }
 }
 
 # Used to create XFS volumes for Swift storage nodes.
-
 class swift-ucs-disk {
-
-  include swift::xfs
 
   $byte_size = '1024'
   $size = '499GB'
   $mnt_base_dir = '/srv/node'
-
-  file { $mnt_base_dir:
-        ensure => directory,
-	owner => 'swift',
-	group => 'swift',
-  }
 
   swift::storage::disk { 'sdb':
     device => "sdb",
@@ -157,15 +188,6 @@ class swift-ucs-disk {
     byte_size => $byte_size,
     size => $size
   }
-
-
-  #filesystem { '/dev/mapper/nova--volumes-swift--lv--2':
-  # ensure => present,
-  # fs_type => 'xfs',
-  # require => Logical_volume['swift-lv-2'],
-  #}
-
-
 }
 
 class role_swift_storage {
@@ -226,7 +248,6 @@ class role_swift_storage {
     weight      => 1,
   }
 
-  # TODO should device be changed to volume
   @@ring_account_device { "${swift_local_net_ip}:6002/sdb":
     zone        => $swift_zone,
     weight      => 1,
@@ -268,8 +289,8 @@ node /<proxy_node1>/ inherits swift_base {
    mgt_interface       => "eth0",
    mgt_ip              => "192.168.220.52",
    mgt_gateway         => "192.168.220.1",
-   storage_vlan        => "221",
-   storage_ip          => "192.168.221.52",
+   storage_vlan        => $swift_storage_vlan,
+   storage_ip          => $swiftproxy01_local_net_ip,
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
  }
@@ -278,12 +299,12 @@ node /<proxy_node1>/ inherits swift_base {
   package { 'curl': ensure => present }
 
   class { 'memcached':
-    listen_ip => $swift_local_net_ip,
+    listen_ip => $swiftproxy01_local_net_ip,
   }
 
   # specify swift proxy and all of its middlewares
   class { 'swift::proxy':
-    proxy_local_net_ip => $swift_local_net_ip,
+    proxy_local_net_ip => $swift_public_net_ip,
     pipeline           => [
       'catch_errors',
       'healthcheck',
@@ -352,12 +373,12 @@ node /<proxy_node1>/ inherits swift_base {
 
   # sets up an rsync db that can be used to sync the ring DB
   class { 'swift::ringserver':
-    local_net_ip => $swift_local_net_ip,
+    local_net_ip => $swiftproxy01_local_net_ip,
   }
 
   # exports rsync gets that can be used to sync the ring files
   @@swift::ringsync { ['account', 'object', 'container']:
-   ring_server => $swift_local_net_ip
+   ring_server => $swiftproxy01_local_net_ip,
  }
 }
 
@@ -372,8 +393,8 @@ node /<swift_proxy2>/ inherits swift_base {
    mgt_interface       => "eth0",
    mgt_ip              => "192.168.220.53",
    mgt_gateway         => "192.168.220.1",
-   storage_vlan        => "221",
-   storage_ip	       => "192.168.221.53",
+   storage_vlan        => $swift_storage_vlan,
+   storage_ip          => $swiftproxy02_local_net_ip,   
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
  }
@@ -382,12 +403,12 @@ node /<swift_proxy2>/ inherits swift_base {
   package { 'curl': ensure => present }
 
   class { 'memcached':
-    listen_ip => $swift_local_net_ip,
+    listen_ip => $swiftproxy02_local_net_ip,
   }
 
   # specify swift proxy and all of its middlewares
   class { 'swift::proxy':
-    proxy_local_net_ip => $swift_local_net_ip,
+    proxy_local_net_ip => $swift_public_net_ip,
     pipeline           => [
       'catch_errors',
       'healthcheck',
@@ -456,12 +477,11 @@ node /<swift_proxy2>/ inherits swift_base {
 
   # sets up an rsync db that can be used to sync the ring DB
   class { 'swift::ringserver':
-    local_net_ip => $swift_local_net_ip,
+    local_net_ip => $swiftproxy02_local_net_ip,
   }
 
   # exports rsync gets that can be used to sync the ring files
   @@swift::ringsync { ['account', 'object', 'container']:
-   ring_server => $swift_local_net_ip
+   ring_server => $swiftproxy02_local_net_ip,
  }
 }
-
