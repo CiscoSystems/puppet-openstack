@@ -23,10 +23,11 @@
 # Top-level Swift Configuration Parameters
 $swift_user_password     = 'swift_pass'
 $swift_shared_secret     = 'Gdr8ny7YyWqy2'
+
 # External interface of Swift Proxy
 $swift_public_net_ip     = $ipaddress_eth0
-# Internal interface and VLAN used for Swift Nodes to communicate with one another
-$swift_local_net_ip      = $ipaddress_eth0_221
+
+# Internal VLAN used for Swift Nodes to communicate with one another
 $swift_storage_vlan      = '221'
 
 # Internal Storage Network definitions.  Create add'l variables for new hosts and ref them in node definition.
@@ -39,16 +40,16 @@ $swift03_local_net_ip         = '192.168.221.73'
 #Memcache definitions used by Proxy Nodes
 $swift_memcache_servers  = ['192.168.220.52:11211,192.168.220.53:11211']
 
+
 # configurations that need to be applied to all swift nodes
 node swift_base inherits base  {
 
   class { 'ssh::server::install': }
 
   class { 'swift':
-    # not sure how I want to deal with this shared secret
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
-  }
+  }  
 }
 
 # The following specifies 3 swift storage nodes
@@ -67,21 +68,102 @@ node /swift01/ inherits swift_base {
    storage_ip          => $swift01_local_net_ip,
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
- }
+  }
+
+  # Deploys Statsd
+#  class { 'statsd':
+#    graphite_host => 'build-os.dmz-pod2.lab',
+#  }
+
+  # install all swift storage servers together
+  class { 'swift::storage::all':
+    storage_local_net_ip => $swift01_local_net_ip,
+  }
 
   # Include class to configure hard disks
   include swift-ucs-disk
 
   # Specify the zone the storage node should reside in
   $swift_zone = 1
-
-  # Add storage devices to rings
-  include role_swift_storage
-
-  # install all swift storage servers together
-  class { 'swift::storage::all':
-    storage_local_net_ip => $swift01_local_net_ip,
+ 
+  # specify endpoints per device to be added to the ring specification
+  @@ring_object_device { "${swift01_local_net_ip}:6000/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
   }
+
+  @@ring_object_device { "${swift01_local_net_ip}:6000/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift01_local_net_ip}:6000/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift01_local_net_ip}:6000/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift01_local_net_ip}:6000/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift01_local_net_ip}:6001/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift01_local_net_ip}:6001/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift01_local_net_ip}:6001/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift01_local_net_ip}:6001/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift01_local_net_ip}:6001/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift01_local_net_ip}:6002/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift01_local_net_ip}:6002/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift01_local_net_ip}:6002/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift01_local_net_ip}:6002/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift01_local_net_ip}:6002/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  # collect resources for synchronizing the ring databases
+  #Swift::Ringsync<<||>>
 }
 
 node /swift02/ inherits swift_base {
@@ -96,10 +178,20 @@ node /swift02/ inherits swift_base {
    mgt_ip              => "192.168.220.72",
    mgt_gateway         => "192.168.220.1",
    storage_vlan        => $swift_storage_vlan,
-   storage_ip          => $swift02_local_net_ip,
+   storage_ip          => $swift02_local_net_ip,   
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
- }
+  }
+
+  # Deploys Statsd
+#  class { 'statsd':
+#    graphite_host => 'build-os.dmz-pod2.lab',
+#  }
+
+  # install all swift storage servers together
+  class { 'swift::storage::all':
+    storage_local_net_ip => $swift02_local_net_ip,
+  }
 
   # Include class to configure hard disks
   include swift-ucs-disk
@@ -107,14 +199,86 @@ node /swift02/ inherits swift_base {
   # Specify the zone the storage node should reside in
   $swift_zone = 2
 
-  # Add storage devices to rings
-  include role_swift_storage
-
-  # install all swift storage servers together
-  class { 'swift::storage::all':
-    storage_local_net_ip => $swift02_local_net_ip,
+  # specify endpoints per device to be added to the ring specification
+  @@ring_object_device { "${swift02_local_net_ip}:6000/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
   }
+
+  @@ring_object_device { "${swift02_local_net_ip}:6000/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift02_local_net_ip}:6000/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift02_local_net_ip}:6000/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift02_local_net_ip}:6000/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift02_local_net_ip}:6001/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift02_local_net_ip}:6001/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift02_local_net_ip}:6001/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift02_local_net_ip}:6001/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift02_local_net_ip}:6001/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift02_local_net_ip}:6002/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift02_local_net_ip}:6002/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift02_local_net_ip}:6002/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift02_local_net_ip}:6002/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift02_local_net_ip}:6002/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  # collect resources for synchronizing the ring databases
+  #Swift::Ringsync<<||>>
 }
+
 node /swift03/ inherits swift_base {
 
  # Configure /etc/network/interfaces file
@@ -127,24 +291,105 @@ node /swift03/ inherits swift_base {
    mgt_ip              => "192.168.220.73",
    mgt_gateway         => "192.168.220.1",
    storage_vlan        => $swift_storage_vlan,
-   storage_ip          => $swift03_local_net_ip,
+   storage_ip          => $swift03_local_net_ip,   
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
- }
+  }
 
-  # Include class to configure hard disks
-  include swift-ucs-disk
-
-  # Specify the zone the storage node should reside in
-  $swift_zone = 1
-
-  # Add storage devices to rings
-  include role_swift_storage
+  # Deploys Statsd
+#  class { 'statsd':
+#    graphite_host => 'build-os.dmz-pod2.lab',
+#  }
 
   # install all swift storage servers together
   class { 'swift::storage::all':
     storage_local_net_ip => $swift03_local_net_ip,
   }
+
+  # Include class to configure hard disks
+  include swift-ucs-disk
+
+  # Specify the zone the storage node should reside in
+  $swift_zone = 3
+
+  # specify endpoints per device to be added to the ring specification
+  @@ring_object_device { "${swift03_local_net_ip}:6000/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift03_local_net_ip}:6000/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift03_local_net_ip}:6000/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift03_local_net_ip}:6000/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_object_device { "${swift03_local_net_ip}:6000/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift03_local_net_ip}:6001/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift03_local_net_ip}:6001/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift03_local_net_ip}:6001/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift03_local_net_ip}:6001/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_container_device { "${swift03_local_net_ip}:6001/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift03_local_net_ip}:6002/sdb":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift03_local_net_ip}:6002/sdc":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift03_local_net_ip}:6002/sdd":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift03_local_net_ip}:6002/sde":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  @@ring_account_device { "${swift03_local_net_ip}:6002/sdf":
+    zone        => $swift_zone,
+    weight      => 1,
+  }
+
+  # collect resources for synchronizing the ring databases
+  #Swift::Ringsync<<||>>
 }
 
 # Used to create XFS volumes for Swift storage nodes.
@@ -190,95 +435,7 @@ class swift-ucs-disk {
   }
 }
 
-class role_swift_storage {
-
-  # install all swift storage servers together
-  class { 'swift::storage::all':
-    storage_local_net_ip => $swift_local_net_ip,
-  }
-
-  # specify endpoints per device to be added to the ring specification
-  @@ring_object_device { "${swift_local_net_ip}:6000/sdb":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_object_device { "${swift_local_net_ip}:6000/sdc":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_object_device { "${swift_local_net_ip}:6000/sdd":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_object_device { "${swift_local_net_ip}:6000/sde":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_object_device { "${swift_local_net_ip}:6000/sdf":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_container_device { "${swift_local_net_ip}:6001/sdb":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_container_device { "${swift_local_net_ip}:6001/sdc":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_container_device { "${swift_local_net_ip}:6001/sdd":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_container_device { "${swift_local_net_ip}:6001/sde":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_container_device { "${swift_local_net_ip}:6001/sdf":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_account_device { "${swift_local_net_ip}:6002/sdb":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_account_device { "${swift_local_net_ip}:6002/sdc":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_account_device { "${swift_local_net_ip}:6002/sdd":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_account_device { "${swift_local_net_ip}:6002/sde":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  @@ring_account_device { "${swift_local_net_ip}:6002/sdf":
-    zone        => $swift_zone,
-    weight      => 1,
-  }
-
-  # collect resources for synchronizing the ring databases
-  Swift::Ringsync<<||>>
-
-}
-
-node /<proxy_node1>/ inherits swift_base {
+node /swiftproxy01/ inherits swift_base {
 
  # Configure /etc/network/interfaces file
  class { 'networking::interfaces':
@@ -293,7 +450,12 @@ node /<proxy_node1>/ inherits swift_base {
    storage_ip          => $swiftproxy01_local_net_ip,
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
- }
+  }
+
+#  # Deploys Collectd
+#  class { 'collectd':
+#    graphitehost => 'build-os.dmz-pod2.lab',
+#  }
 
   # curl is only required so that I can run tests
   package { 'curl': ensure => present }
@@ -325,9 +487,9 @@ node /<proxy_node1>/ inherits swift_base {
   class { [
     'swift::proxy::catch_errors',
     'swift::proxy::healthcheck',
-    #'swift::proxy::cache',
     'swift::proxy::swift3',
-  ]: }
+  ]: 
+  }
   
   class { 'swift::proxy::cache':
     memcache_servers  	   => $swift_memcache_servers,   
@@ -338,7 +500,7 @@ node /<proxy_node1>/ inherits swift_base {
     max_sleep_time_seconds => 60,
     log_sleep_time_seconds => 0,
     rate_buffer_seconds    => 5,
-    account_ratelimit      => 0
+    account_ratelimit      => 0,
   }
   class { 'swift::proxy::s3token':
     # assume that the controller host is the swift api server
@@ -356,8 +518,7 @@ node /<proxy_node1>/ inherits swift_base {
     auth_host         => $controller_node_public,
   }
 
-  # collect all of the resources that are needed
-  # to balance the ring
+  # collect all of the resources that are needed to balance the ring
   Ring_object_device <<| |>>
   Ring_container_device <<| |>>
   Ring_account_device <<| |>>
@@ -379,10 +540,10 @@ node /<proxy_node1>/ inherits swift_base {
   # exports rsync gets that can be used to sync the ring files
   @@swift::ringsync { ['account', 'object', 'container']:
    ring_server => $swiftproxy01_local_net_ip,
- }
+  }
 }
 
-node /<swift_proxy2>/ inherits swift_base {
+node /swiftproxy02/ inherits swift_base {
 
  # Configure /etc/network/interfaces file
  class { 'networking::interfaces':
@@ -397,7 +558,12 @@ node /<swift_proxy2>/ inherits swift_base {
    storage_ip          => $swiftproxy02_local_net_ip,   
    dns_servers         => "192.168.220.254",
    dns_search          => "dmz-pod2.lab",
- }
+  }
+
+#  # Deploys Collectd
+#  class { 'collectd':
+#    graphitehost => 'build-os.dmz-pod2.lab',
+#  }
 
   # curl is only required so that I can run tests
   package { 'curl': ensure => present }
@@ -429,9 +595,9 @@ node /<swift_proxy2>/ inherits swift_base {
   class { [
     'swift::proxy::catch_errors',
     'swift::proxy::healthcheck',
-    #'swift::proxy::cache',
     'swift::proxy::swift3',
-  ]: }
+  ]: 
+  }
   
   class { 'swift::proxy::cache':
     memcache_servers  	   => $swift_memcache_servers,   
@@ -442,7 +608,7 @@ node /<swift_proxy2>/ inherits swift_base {
     max_sleep_time_seconds => 60,
     log_sleep_time_seconds => 0,
     rate_buffer_seconds    => 5,
-    account_ratelimit      => 0
+    account_ratelimit      => 0,
   }
   class { 'swift::proxy::s3token':
     # assume that the controller host is the swift api server
@@ -460,8 +626,7 @@ node /<swift_proxy2>/ inherits swift_base {
     auth_host         => $controller_node_public,
   }
 
-  # collect all of the resources that are needed
-  # to balance the ring
+  # collect all of the resources that are needed to balance the ring
   Ring_object_device <<| |>>
   Ring_container_device <<| |>>
   Ring_account_device <<| |>>
@@ -483,5 +648,5 @@ node /<swift_proxy2>/ inherits swift_base {
   # exports rsync gets that can be used to sync the ring files
   @@swift::ringsync { ['account', 'object', 'container']:
    ring_server => $swiftproxy02_local_net_ip,
- }
+  }
 }
