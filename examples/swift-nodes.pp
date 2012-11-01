@@ -163,7 +163,7 @@ node /swift01/ inherits swift_base {
   }
 
   # collect resources for synchronizing the ring databases
-  #Swift::Ringsync<<||>>
+  Swift::Ringsync<<||>>
 }
 
 node /swift02/ inherits swift_base {
@@ -276,7 +276,7 @@ node /swift02/ inherits swift_base {
   }
 
   # collect resources for synchronizing the ring databases
-  #Swift::Ringsync<<||>>
+  Swift::Ringsync<<||>>
 }
 
 node /swift03/ inherits swift_base {
@@ -389,7 +389,7 @@ node /swift03/ inherits swift_base {
   }
 
   # collect resources for synchronizing the ring databases
-  #Swift::Ringsync<<||>>
+  Swift::Ringsync<<||>>
 }
 
 # Used to create XFS volumes for Swift storage nodes.
