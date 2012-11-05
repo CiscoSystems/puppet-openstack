@@ -1,6 +1,6 @@
 # The OpenStack High Availability Modules:
 
-'''Note:''' The Readme is not being activly maintained.  For the latest updates, please reference the
+**Note:** The Readme is not being activly maintained.  For the latest updates, please reference the
 ['Essex HA Deployment Guide'](http://docwiki.cisco.com/wiki/OpenStack:Essex_Multi_Node_HA)
 
 ## Introduction
