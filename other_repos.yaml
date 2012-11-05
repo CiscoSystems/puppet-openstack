@@ -25,6 +25,7 @@ repos:
     git://github.com/CiscoSystems/puppet-create_resources: create_resources
     git://github.com/CiscoSystems/puppet-sysctl: sysctl
     git://github.com/danehans/puppet-networking: networking
+    git://github.com/danehans/puppet-augeas.git: augeas
     git://github.com/danehans/puppet-module-keepalived: keepalived
     git://github.com/danehans/puppet-haproxy: haproxy
     git://github.com/CiscoSystems/cisco-openstack-docs: os-docs
