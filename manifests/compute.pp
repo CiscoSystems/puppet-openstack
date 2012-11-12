@@ -58,7 +58,7 @@ class openstack::compute(
   $auto_assign_floating_ip = false,
   $api_bind_address    = '0.0.0.0',
   $nova_user_password  = 'nova_pass',
-  #$rabbit_addresses,
+  $rabbit_addresses    = 'localhost',  
   $rabbit_password     = 'rabbit_pw',
   $rabbit_user         = 'nova',
   #$glance_api_servers  = false,
@@ -78,8 +78,8 @@ class openstack::compute(
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    @@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
-    Nova_config <| title == 'rabbit_addresses' |>
+    #@@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
+    #Nova_config <| title == 'rabbit_addresses' |>
     @@nova_config { 'sql_connection': value => $sql_connection }
     Nova_config <| title == 'sql_connection' |>
     @@nova_config { 'glance_api_servers': value => $glance_api_servers }
@@ -91,7 +91,7 @@ class openstack::compute(
   } else {
     $sql_connection    = $nova_db
     $glance_api_servers = $glance_api_vip
-    $rabbit_addresses  = $rabbit_addresses
+    #$rabbit_addresses  = $rabbit_addresses
   }
 
   class { 'nova':
@@ -99,6 +99,7 @@ class openstack::compute(
     rabbit_host        => $rabbit_host,
     rabbit_userid      => $rabbit_user,
     rabbit_password    => $rabbit_password,
+    rabbit_addresses   => $rabbit_addresses,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_api_servers,
     #prevent_db_sync    => $prevent_db_sync,

@@ -21,8 +21,20 @@ $public_interface        = 'eth0'
 # this configuration assumes this interface is active but does not have an
 # ip address allocated to it.
 $private_interface       = 'eth0.221'
-# openstack::controller class assumes IP_addr_eth0. It is included here to be explicit.
-$internal_address        = $ipaddress_eth0
+# OpenStack Management Network Settings. Add entries as needed.
+$compute01_internal_address = '192.168.220.51'
+$internal_net_mask          = '255.255.255.0'
+$internal_gateway           = '192.168.220.1'
+$internal_vlan              = '221'
+$internal_dns_servers       = '192.168.220.254'
+$internal_dns_search        = 'dmz-pod2.lab'
+# OpenStack Controller VM/Instance network settings.  The network number should be from the $fixed_network_range.
+# Make sure to remove Controller vmnet_addresses from the fixed range or you can have ip conflicts with instances.
+# Example: nova-manage fixed reserve 10.0.0.241
+$control01_vmnet_address    = '10.0.0.41'
+$control02_vmnet_address    = '10.0.0.42'
+$control03_vmnet_address    = '10.0.0.43'
+$controller_vmnet_mask      = '255.255.255.0'
 # credentials
 $admin_email             = 'root@localhost'
 $admin_password          = 'Cisco123'
@@ -45,15 +57,18 @@ $verbose                 = 'false'
 $auto_assign_floating_ip = true
 # Swift addresses:
 $swift_proxy_address    = '192.168.220.60'
-# MySQL Information
+# MySQL and Galera Information
 $mysql_root_password    = 'ubuntu'
 $mysql_puppet_password  = 'ubuntu'
+$mysql_galera_user      = 'galera_user'
+$mysql_galera_password  = 'galera_pass'
+# Nova DB Information
 $sql_connection = "mysql://nova:${nova_db_password}@${controller_node_address}/nova"
+# OpenStack Dashboard (Horizon) secret key
 $horizon_secret_key     = 'elj1IWiLoWHgcyYxFVLj7cM5rGOOxWl0'
 # RabbitMQ Cluster Configuration
 $cluster_rabbit         = true
 $rabbit_cluster_disk_nodes = ['control01', 'control02', 'control03']
-
 #### end shared variables #################
 
 # multi-controller deployment parameters
@@ -67,15 +82,15 @@ $controller_node_internal      = $controller_node_address
 $controller_hostname           = 'control'
 
 # The actual address and hostname of the primary controller
-$controller_node_primary       = '192.168.220.41'
+$controller_node_primary       = $control01_internal_address
 $controller_hostname_primary   = 'control01'
 
 # The actual address and hostname of the secondary controller
-$controller_node_secondary     = '192.168.220.42'
+$controller_node_secondary     = $control02_internal_address
 $controller_hostname_secondary = 'control02'
 
 # The actual address and hostname of the tertiary controller
-$controller_node_tertiary     = '192.168.220.43'
+$controller_node_tertiary     = $control03_internal_address
 $controller_hostname_tertiary = 'control03'
 
 # The Virtual Swift Proxy Hostname and IP address

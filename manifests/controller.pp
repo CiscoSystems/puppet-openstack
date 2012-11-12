@@ -71,7 +71,7 @@ class openstack::controller(
   $rabbit_password         = 'rabbit_pw',
   $rabbit_ha               = true,
   $rabbit_user             = 'nova',
-  $rabbit_addresses        = [$controller_node_primary, $controller_node_secondary,$controller_node_tertiary],
+  $rabbit_addresses        = 'localhost',
   $cluster_rabbit          = false,
   $cluster_disk_nodes      = [],
   # network configuration
