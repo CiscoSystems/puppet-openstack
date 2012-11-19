@@ -36,7 +36,7 @@ node /<SLB-01>/ inherits base {
  # Take note that this node is the backup for the Swift Proxy VIP.
  keepalived::instance { '51':
   interface         => 'eth0',
-  virtual_ips       => "${$swiftproxy_vip_address} dev eth0",
+  virtual_ips       => "${swiftproxy_vip_address} dev eth0",
   state             => 'BACKUP',
   priority          => '100',
  }
@@ -231,7 +231,7 @@ node /<SLB-02>/ inherits base {
  # Take note the this node is active for the Swift Proxy VIP.
  keepalived::instance { '51':
   interface         => 'eth0',
-  virtual_ips       => "${$swiftproxy_vip_address} dev eth0",
+  virtual_ips       => "${swiftproxy_vip_address} dev eth0",
   state             => 'MASTER',
   priority          => '101',
  }
