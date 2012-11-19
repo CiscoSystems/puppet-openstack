@@ -82,6 +82,7 @@ class openstack::controller(
   $floating_range          = false,
   $create_networks         = true,
   $num_networks            = 1,
+  $network_size		   = 256,
   $multi_host              = false,
   $auto_assign_floating_ip = false,
   # TODO need to reconsider this design...
@@ -333,6 +334,7 @@ class openstack::controller(
     config_overrides  => $network_config,
     create_networks   => $really_create_networks,
     num_networks      => $num_networks,
+    network_size      => $network_size,
     enabled           => $enable_network_service,
     install_service   => $enable_network_service,
   }
