@@ -17,7 +17,7 @@ class openstack::test_file(
   $path         = '/tmp/test_nova.sh',
   $rc_file_path = '/root/openrc',
   $image_type   = 'precise',
-  $sleep_time   = '15',
+  $sleep_time   = '30',
   $floating_ip  = true
 ) {
 

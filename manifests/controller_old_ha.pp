@@ -48,7 +48,7 @@
 #
 # [enabled] Whether services should be enabled. This parameter can be used to
 #   implement services in active-passive modes for HA. Optional. Defaults to true.
-class openstack::controller(
+class openstack::controller_old_ha(
   # my address
   $public_address,
   $virtual_address,
@@ -69,11 +69,7 @@ class openstack::controller(
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
   $rabbit_password         = 'rabbit_pw',
-  $rabbit_ha               = true,
   $rabbit_user             = 'nova',
-  $rabbit_addresses        = 'localhost',
-  $cluster_rabbit          = false,
-  $cluster_disk_nodes      = [],
   # network configuration
   # this assumes that it is a flat network manager
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
@@ -82,7 +78,6 @@ class openstack::controller(
   $floating_range          = false,
   $create_networks         = true,
   $num_networks            = 1,
-  $network_size		   = 256,
   $multi_host              = false,
   $auto_assign_floating_ip = false,
   # TODO need to reconsider this design...
@@ -106,12 +101,11 @@ class openstack::controller(
 
   $glance_api_servers = "${virtual_address}:9292"
   $nova_db = "mysql://nova:${nova_db_password}@${virtual_address}/nova"
-  #$rabbit_servers = "UNDEF"
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    #@@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
-    #Nova_config <| title == 'rabbit_addresses' |> 
+    @@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
+    Nova_config <| title == 'rabbit_addresses' |>
     @@nova_config { 'sql_connection': value => $sql_connection }
     Nova_config <| title == 'sql_connection' |>
     @@nova_config { 'glance_api_servers': value => $glance_connection }
@@ -123,7 +117,7 @@ class openstack::controller(
   } else {
     $sql_connection    = $nova_db
     $glance_connection = $glance_api_servers
-    #$rabbit_addresses
+    $rabbit_addresses = $rabbit_addresses
   }
 
   ####### DATABASE SETUP ######
@@ -254,21 +248,12 @@ class openstack::controller(
 
   ######## BEGIN NOVA ###########
 
- if $cluster_rabbit {
-  class { 'nova::rabbitmq':
-    userid   => $rabbit_user,
-    password => $rabbit_password,
-    config_cluster => true,
-    cluster_disk_nodes => $cluster_disk_nodes,
-    enabled  => $enabled,
-  }
- } else {
+
   class { 'nova::rabbitmq':
     userid   => $rabbit_user,
     password => $rabbit_password,
     enabled  => $enabled,
   }
- }
 
   # TODO I may need to figure out if I need to set the connection information
   # or if I should collect it
@@ -334,7 +319,6 @@ class openstack::controller(
     config_overrides  => $network_config,
     create_networks   => $really_create_networks,
     num_networks      => $num_networks,
-    network_size      => $network_size,
     enabled           => $enable_network_service,
     install_service   => $enable_network_service,
   }
@@ -362,29 +346,5 @@ class openstack::controller(
 
 
   ######## End Horizon #####
-
-  ######## Begin RabbitMQ ##########
-
-  # Pin Rabbit Repo
-  if $rabbit_ha {
-  # Load RabbitMQ Apt Repo for 2.8.7-1 needed for HA
-  apt::source { 'rabbitmq_server':
-    location          => 'http://www.rabbitmq.com/debian/',
-    release           => 'testing',
-    key              => '1024D/056E8E56',
-    key_source        => 'http://www.rabbitmq.com/rabbitmq-signing-key-public.asc',
-  }
-
-  # an apt-get update is usually required to ensure that
-  # we get the latest version of packages
-  exec { '/usr/bin/apt-get update':
-    require     => Class['apt'],
-    refreshonly => true,
-    subscribe   => [Class['apt'], Apt::Source['rabbitmq_server']],
-    logoutput   => true,
-  }
- }
-
-  ######## End RabbitMQ ##########
 
 }

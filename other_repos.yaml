@@ -1,27 +1,53 @@
-# modulepath: /etc/puppet/modules
+# modulepath: /usr/share/puppet/modules
 repos:
   repo_paths:
-    # openstack git repos
-    git://github.com/puppetlabs/puppetlabs-nova: nova
-    git://github.com/puppetlabs/puppetlabs-glance: glance
-    git://github.com/puppetlabs/puppetlabs-swift: swift
-    git://github.com/puppetlabs/puppetlabs-keystone: keystone
-    git://github.com/puppetlabs/puppetlabs-horizon: horizon
-    # openstack middleware
-    git://github.com/puppetlabs/puppetlabs-rabbitmq: rabbitmq
-    git://github.com/puppetlabs/puppetlabs-mysql: mysql
-    git://github.com/puppetlabs/puppetlabs-git: git
+    # Core OpenStack Repos
+    #git://github.com/danehans/puppet-openstack: openstack
+    git://github.com/danehans/puppetlabs-nova: nova
+    git://github.com/danehans/puppetlabs-glance: glance
+    git://github.com/danehans/puppetlabs-keystone: keystone
+    git://github.com/danehans/puppetlabs-horizon: horizon
+    git://github.com/CiscoSystems/puppet-swift: swift
+    # OpenStack Middleware Repos
+    git://github.com/danehans/puppetlabs-rabbitmq: rabbitmq
+    git://github.com/CiscoSystems/puppet-mysql: mysql
+    git://github.com/danehans/puppet-galera: galera
     git://github.com/puppetlabs/puppetlabs-vcsrepo: vcsrepo
-    git://github.com/saz/puppet-memcached: memcached
-    git://github.com/puppetlabs/puppetlabs-rsync: rsync
-    # other deps
-    git://github.com/ghoneycutt/puppet-xinetd: xinetd
-    git://github.com/saz/puppet-ssh: ssh
-    git://github.com/puppetlabs/puppetlabs-stdlib: stdlib
-    git://github.com/puppetlabs/puppetlabs-apt: apt
-    git://github.com/ripienaar/puppet-concat: concat
-    git://github.com/duritong/puppet-sysctl.git: sysctl
+    git://github.com/CiscoSystems/puppet-memcached: memcached
+    git://github.com/CiscoSystems/puppet-rsync: rsync
+    git://github.com/CiscoSystems/puppet-apache: apache
+    # Foundational Repos
+    git://github.com/CiscoSystems/puppet-xinetd: xinetd
+    git://github.com/CiscoSystems/puppet-ssh: ssh
+    git://github.com/CiscoSystems/puppet-stdlib: stdlib
+    git://github.com/CiscoSystems/puppet-apt: apt
+    git://github.com/CiscoSystems/puppet-concat: concat
+    git://github.com/CiscoSystems/puppet-create_resources: create_resources
+    git://github.com/CiscoSystems/puppet-sysctl: sysctl
+    git://github.com/danehans/puppet-networking: networking
+    git://github.com/danehans/puppet-augeas.git: augeas
+    git://github.com/danehans/puppet-module-keepalived: keepalived
+    git://github.com/danehans/puppet-haproxy: haproxy
+    git://github.com/CiscoSystems/cisco-openstack-docs: os-docs
+    # Build Node Repos
+    git://github.com/CiscoSystems/puppetlabs-lvm: lvm
+    git://github.com/CiscoSystems/puppet-ntp: ntp
+    git://github.com/CiscoSystems/puppet-puppet: puppet
+    git://github.com/danehans/puppet-cobbler: cobbler
+    git://github.com/CiscoSystems/puppet-dnsmasq: dnsmasq
+    git://github.com/CiscoSystems/puppet-apt-cacher-ng: apt-cacher-ng
+    git://github.com/puppetlabs/puppetlabs-git: git
+    # Optional Repos
+    git://github.com/CiscoSystems/puppet-horizion-branding: branding
+    git://github.com/CiscoSystems/puppet-graphite: graphite
+    git://github.com/CiscoSystems/puppet-nagios: nagios
+    git://github.com/danehans/puppet-collectd: collectd
+    git://github.com/danehans/puppet-statsd: statsd
   checkout_branches:
-#  keystone: dev
-#  glance: dev
-#    nova: dev
+    keystone: essex-ha
+    glance: essex-ha
+    nova: essex-ha
+    horizon: essex-ha
+    galera: essex-ha
+    rabbitmq: essex-ha
+    collectd: patch-1

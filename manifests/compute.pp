@@ -20,6 +20,7 @@
 #   Optional. Defaults to false.
 # [network_config] Hash that can be used to pass implementation specifc
 #   network settings. Optioal. Defaults to {}
+# [auto_assign_floating_ip] Rather configured to automatically allocate and 
 # [sql_connection] SQL connection information. Optional. Defaults to false
 #   which indicates that exported resources will be used to determine connection
 #   information.
@@ -47,38 +48,61 @@
 class openstack::compute(
   $private_interface,
   $internal_address,
+  $virtual_address     = $virtual_address,
   # networking config
   $public_interface    = undef,
   $fixed_range         = '10.0.0.0/16',
   $network_manager     = 'nova.network.manager.FlatDHCPManager',
   $multi_host          = false,
   $network_config      = {},
-  # my address
-  # conection information
-  $sql_connection      = false,
+  $auto_assign_floating_ip = false,
+  $api_bind_address    = '0.0.0.0',
   $nova_user_password  = 'nova_pass',
-  $rabbit_host         = false,
+  $rabbit_addresses    = 'localhost',  
   $rabbit_password     = 'rabbit_pw',
   $rabbit_user         = 'nova',
-  $glance_api_servers  = false,
+  #$glance_api_servers  = false,
   # nova compute configuration parameters
   $libvirt_type        = 'kvm',
   $vncproxy_host       = false,
   $vnc_enabled         = 'true',
   $verbose             = false,
   $manage_volumes      = false,
+  $nova_db_password    = 'nova_pass',
   $nova_volume         = 'nova-volumes',
-  $prevent_db_sync     = true
+  #$prevent_db_sync     = true
 ) {
+
+  $glance_api_vip = "${virtual_address}:9292"
+  $nova_db = "mysql://nova:${nova_db_password}@${virtual_address}/nova"
+
+  if ($export_resources) {
+    # export all of the things that will be needed by the clients
+    #@@nova_config { 'rabbit_addresses': value => $rabbit_addresses }
+    #Nova_config <| title == 'rabbit_addresses' |>
+    @@nova_config { 'sql_connection': value => $sql_connection }
+    Nova_config <| title == 'sql_connection' |>
+    @@nova_config { 'glance_api_servers': value => $glance_api_servers }
+    Nova_config <| title == 'glance_api_servers' |>
+    @@nova_config { 'novncproxy_base_url': value => "http://${virtual_address}:6080/vnc_auto.html" }
+    $sql_connection    = false
+    $glance_api_servers = false
+    $rabbit_addresses = false
+  } else {
+    $sql_connection    = $nova_db
+    $glance_api_servers = $glance_api_vip
+    #$rabbit_addresses  = $rabbit_addresses
+  }
 
   class { 'nova':
     sql_connection     => $sql_connection,
     rabbit_host        => $rabbit_host,
     rabbit_userid      => $rabbit_user,
     rabbit_password    => $rabbit_password,
+    rabbit_addresses   => $rabbit_addresses,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_api_servers,
-    prevent_db_sync    => $prevent_db_sync,
+    #prevent_db_sync    => $prevent_db_sync,
     verbose            => $verbose,
   }
 
@@ -113,6 +137,8 @@ class openstack::compute(
       admin_tenant_name => 'services',
       admin_user        => 'nova',
       admin_password    => $nova_user_password,
+      auth_host         => $virtual_address,
+      api_bind_address  => $api_bind_address,
     }
   } else {
     $enable_network_service = false
@@ -133,6 +159,10 @@ class openstack::compute(
     create_networks   => false,
     enabled           => $enable_network_service,
     install_service   => $enable_network_service,
+  }
+
+  if $auto_assign_floating_ip {
+  nova_config { 'auto_assign_floating_ip':   value => 'True'; }
   }
 
   if $manage_volumes {

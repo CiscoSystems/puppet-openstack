@@ -7,7 +7,6 @@
 
 begin
   require 'yaml'
-  require 'puppetlabs_spec_helper/rake_tasks'
 rescue LoadError
   puts "!!!!!"
   puts "puppetlabs_spec_helper not found. This may cause some rake tasks to be unavailable."
@@ -33,7 +32,7 @@ namespace :modules do
     end
     branches_to_checkout.each do |local, branch|
       Dir.chdir(File.join(modulepath, local)) do
-        output = `git checkout #{branch}`
+        output = `git checkout -t -b #{branch} remotes/origin/#{branch}`
       end
       # Puppet.debug(output)
     end
