@@ -188,6 +188,7 @@ node /control01/ inherits base {
     cache_server_ip         => $internal_address,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
+    rabbit_addresses        => [$controller_node_primary, $controller_node_secondary, $controller_node_tertiary],
     cluster_rabbit          => $cluster_rabbit,
     cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
     api_bind_address        => $internal_address,
@@ -266,6 +267,7 @@ node /control02/ inherits base {
     rabbit_user             => $rabbit_user,
     cluster_rabbit          => $cluster_rabbit,
     cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
+    rabbit_addresses        => [$controller_node_secondary, $controller_node_primary, $controller_node_tertiary],
     api_bind_address        => $internal_address,
     export_resources        => false,
   }
@@ -334,6 +336,7 @@ node /control03/ inherits base {
     rabbit_user             => $rabbit_user,
     cluster_rabbit          => $cluster_rabbit,
     cluster_disk_nodes      => $rabbit_cluster_disk_nodes,
+    rabbit_addresses        => [$controller_node_tertiary, $controller_node_secondary, $controller_node_primary],
     api_bind_address        => $internal_address,
     export_resources        => false,
   }
@@ -387,6 +390,7 @@ node /compute01/ inherits base {
     nova_db_password   => $nova_db_password,
     rabbit_password    => $rabbit_password,
     rabbit_user        => $rabbit_user,
+    rabbit_addresses   => [$controller_node_primary, $controller_node_secondary, $controller_node_tertiary],    
     api_bind_address   => $internal_address,    
     vncproxy_host      => $controller_node_address,
     vnc_enabled        => 'true',
