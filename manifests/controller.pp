@@ -74,7 +74,7 @@ class openstack::controller(
   # this number has been reduced for performance during testing
   $fixed_range             = '10.0.0.0/16',
   $floating_range          = false,
-  $create_networks         = true,
+  $create_networks         = false,
   $num_networks            = 1,
   $multi_host              = false,
   $auto_assign_floating_ip = false,
