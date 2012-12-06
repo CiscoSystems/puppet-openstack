@@ -64,6 +64,8 @@ class openstack::controller(
   $keystone_admin_tenant   = 'openstack',
   $glance_db_password      = 'glance_pass',
   $glance_user_password    = 'glance_pass',
+  $glance_host             = '127.0.0.1',
+  $glance_sql_connection   = 'sqlite',
   $nova_db_password        = 'nova_pass',
   $nova_user_password      = 'nova_pass',
   $rabbit_password         = 'rabbit_pw',
@@ -211,7 +213,7 @@ class openstack::controller(
     }
     Class['glance::db::mysql'] -> Class['glance::registry']
     class { 'glance::db::mysql':
-      host     => '127.0.0.1',
+      host     => $glance_host,
       password => $glance_db_password,
     }
     # TODO should I allow all hosts to connect?
@@ -286,6 +288,7 @@ class openstack::controller(
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
+    sql_connection    => $glance_sql_connection,
     enabled           => $enabled,
   }
   if $glance_on_swift {
