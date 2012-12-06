@@ -77,6 +77,7 @@ class openstack::compute(
   $quantum_admin_username       = 'quantum',
   $quantum_admin_password       = 'quantum',
   $quantum_admin_auth_url       = 'http://172.29.74.194:35357/v2.0',
+  $quantum_ip_overlap           = false,
   $libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtOpenVswitchDriver',
   $libvirt_use_virtio_for_bridges       = 'True',
   $host         = 'compute',
@@ -184,6 +185,7 @@ class openstack::compute(
     quantum_admin_username => $quantum_admin_username,
     quantum_admin_password => $quantum_admin_password,
     quantum_admin_auth_url => $quantum_admin_auth_url,
+    quantum_ip_overlap     => $quantum_ip_overlap,
     libvirt_vif_driver => $libvirt_vif_driver,
     libvirt_use_virtio_for_bridges => $libvirt_use_virtio_for_bridges, 
   }
