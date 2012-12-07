@@ -482,7 +482,7 @@ class {"quantum::agents::l3":
   use_namespaces           => $l3_use_namespaces,
   router_id                => $router_id,
   gateway_external_net_id  => $gateway_external_net_id,
-  metadata_ip              => $metadata_ip,
+  metadata_ip              => $l3_metadata_ip,
   external_network_bridge  => $external_network_bridge,
   root_helper              => $root_helper,
 }
