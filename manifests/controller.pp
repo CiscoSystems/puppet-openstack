@@ -71,6 +71,7 @@ class openstack::controller(
   $rabbit_user             = 'nova',
   # network configuration
   # this assumes that it is a flat network manager
+  $nova_net_install	   = false,
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
   # this number has been reduced for performance during testing
   $fixed_range             = '10.0.0.0/16',
@@ -343,9 +344,6 @@ class openstack::controller(
   class { 'nova::api':
     enabled           => $enabled,
     # TODO this should be the nova service credentials
-    #admin_tenant_name => 'openstack',
-    #admin_user        => 'admin',
-    #admin_password    => $admin_service_password,
     admin_tenant_name => 'services',
     admin_user        => 'nova',
     admin_password    => $nova_user_password,
@@ -389,7 +387,8 @@ class openstack::controller(
     create_networks   => $really_create_networks,
     num_networks      => $num_networks,
     enabled           => $enable_network_service,
-    install_service   => $enable_network_service,
+    #install_service   => $enable_network_service,
+    #install_service   => $nova_net_install,
     network_api_class	=> $network_api_class,
     quantum_url => $quantum_url,
     quantum_auth_strategy => $quantum_auth_strategy,

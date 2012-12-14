@@ -56,6 +56,7 @@ class openstack::compute(
   # my address
   # conection information
   $sql_connection      = false,
+  $auth_host           = '127.0.0.1',
   $nova_user_password  = 'nova_pass',
   $rabbit_host         = false,
   $rabbit_password     = 'rabbit_pw',
@@ -139,6 +140,13 @@ class openstack::compute(
     vncserver_listen => $internal_address,
   }
 
+  class { 'nova::api':
+    auth_host	      => $auth_host,
+    admin_tenant_name => 'services',
+    admin_user        => 'nova',
+    admin_password    => $nova_user_password,
+  }
+
   # if the compute node should be configured as a multi-host
   # compute installation
   if $multi_host {
@@ -153,12 +161,6 @@ class openstack::compute(
       fail('public_interface must be defined for multi host compute nodes')
     }
     $enable_network_service = true
-    class { 'nova::api':
-      enabled           => true,
-      admin_tenant_name => 'services',
-      admin_user        => 'nova',
-      admin_password    => $nova_user_password,
-    }
   } else {
     $enable_network_service = false
     nova_config {
