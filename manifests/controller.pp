@@ -478,8 +478,9 @@ class {"quantum::agents::l3":
 }
 
 class { "quantum::agents::ovs":
-  package_ensure       => $quantum_package_ensure,
+  package_ensure           => $quantum_package_ensure,
   bridge_uplinks           => $ovs_bridge_uplinks,
+  bridge_mappings          => $ovs_bridge_mappings,
   enable_tunneling         => $ovs_enable_tunneling,
   local_ip                 => $ovs_local_ip,
   integration_bridge       => $ovs_integration_bridge,
