@@ -418,14 +418,13 @@ class { "quantum":
   control_exchange     => $quantum_control_exchange,
   core_plugin            => $quantum_core_plugin,
   mac_generation_retries => $quantum_mac_generation_retries,
-}
   dhcp_lease_duration    => $quantum_dhcp_lease_duration,
+}
 
 class { "quantum::server":
   package_ensure       => $quantum_package_ensure,
   auth_host            => $quantum_auth_host,
   auth_password        => $quantum_admin_password,
-  auth_host            => 'localhost',
 }
 
 # The CLI client
@@ -434,7 +433,6 @@ class { "quantum::client": }
 # The plugin for the server
 class { "quantum::plugins::ovs":
     package_ensure       => $quantum_package_ensure,
-    bridge_mappings      => $ovs_bridge_mappings,
     tenant_network_type  => $ovs_tenant_network_type,
     network_vlan_ranges  => $ovs_network_vlan_ranges,
     tunnel_id_ranges     => $ovs_tunnel_id_ranges,
