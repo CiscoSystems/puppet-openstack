@@ -102,7 +102,6 @@ class openstack::compute(
   $quantum_dhcp_lease_duration    = 120,
 #quantum ovs
   $ovs_bridge_uplinks      = ['br-ex:eth0.40'],
-  $ovs_use_bridge_uplink    = false,
   $ovs_bridge_mappings      = ['default:br-ex'],
   $ovs_tenant_network_type  = "vlan",
   $ovs_network_vlan_ranges  = "default:1000:2000",
@@ -209,25 +208,14 @@ class openstack::compute(
     dhcp_lease_duration    => $quantum_dhcp_lease_duration,
   }
 
-  class { "quantum::plugins::ovs":
-    bridge_mappings      => $ovs_bridge_mappings,
-    tenant_network_type  => $ovs_tenant_network_type,
-    network_vlan_ranges  => $ovs_network_vlan_ranges,
-    integration_bridge   => $ovs_integration_bridge,
-    enable_tunneling    => $ovs_enable_tunneling,
-    tunnel_bridge        => $ovs_tunnel_bridge,
-    tunnel_id_ranges     => $ovs_tunnel_id_ranges,
-    root_helper          => $ovs_root_helper,
-    sql_connection       => $ovs_sql_connection,
-  }
-
-  class { "quantum::client": }
-
   class { "quantum::agents::ovs":
-    bridge_uplinks       => $ovs_bridge_uplinks,
-    use_bridge_uplink    => $ovs_use_bridge_uplink,
-    enable_tunneling     => $ovs_enable_tunneling,
-    local_ip             => $ovs_local_ip,
+    package_ensure       => $quantum_package_ensure,
+    bridge_uplinks           => $ovs_bridge_uplinks,
+    enable_tunneling         => $ovs_enable_tunneling,
+    local_ip                 => $ovs_local_ip,
+    integration_bridge       => $ovs_integration_bridge,
+    tunnel_bridge            => $ovs_tunnel_bridge,
+    root_helper              => $ovs_root_helper,
   }
 
   if $manage_volumes {
