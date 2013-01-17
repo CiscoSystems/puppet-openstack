@@ -138,7 +138,7 @@ class openstack::controller(
   $ovs_local_ip             = "10.0.0.1",
   $ovs_server               = false,
   $ovs_root_helper          = "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
-  $ovs_sql_connection       = "mysql://quantum:quantum@localhost/quantum",
+  $ovs_sql_connection       = "mysql://quantum:quantum@localhost/quantum", # must match quantum DB information
 #quantum db
   $quantum_db_password      = "quantum",
   $quantum_db_name        = 'quantum',
@@ -402,21 +402,14 @@ class openstack::controller(
     libvirt_use_virtio_for_bridges => $libvirt_use_virtio_for_bridges,
   }
 
-  class { "quantum":
+
+class { "quantum":
   enabled              => $quantum_enabled,
   package_ensure       => $quantum_package_ensure,
-  log_verbose          => $quantum_log_verbose,
-  log_debug            => $quantum_log_debug,
+  verbose              => $quantum_log_verbose,
+  debug                => $quantum_log_debug,
   bind_host            => $quantum_bind_host,
   bind_port            => $quantum_bind_port,
-  sql_connection       => $quantum_sql_connection,
-  auth_type            => $quantum_auth_strategy,
-  auth_host            => $quantum_auth_host,
-  auth_port            => $quantum_auth_port,
-  auth_uri             => $quantum_admin_auth_url,
-  keystone_tenant      => $quantum_admin_tenant_name,
-  keystone_user        => $quantum_admin_username,
-  keystone_password    => $quantum_admin_password,
   rabbit_host          => $quantum_rabbit_host,
   rabbit_port          => $quantum_rabbit_port,
   rabbit_user          => $quantum_rabbit_user,
@@ -428,30 +421,25 @@ class openstack::controller(
   dhcp_lease_duration    => $quantum_dhcp_lease_duration,
 }
 
-class { "quantum::plugins::ovs":
-    bridge_uplinks      => $ovs_bridge_uplinks,
-    bridge_mappings      => $ovs_bridge_mappings,
-    tenant_network_type  => $ovs_tenant_network_type,
-    network_vlan_ranges  => $ovs_network_vlan_ranges,
-    integration_bridge   => $ovs_integration_bridge,
-    enable_tunneling    => $ovs_enable_tunneling,
-    tunnel_bridge        => $ovs_tunnel_bridge,
-    tunnel_id_ranges     => $ovs_tunnel_id_ranges,
-    local_ip             => $ovs_local_ip,
-    server               => $ovs_server,
-    root_helper          => $ovs_root_helper,
-    sql_connection       => $ovs_sql_connection,
-  }
-
-
-class { "quantum::rabbitmq":
-  userid => $quantum_rabbit_user,
-  password => $quantum_rabbit_password,
-  port => $quantum_rabbit_port,
-  virtual_host => $quantum_rabbit_virtual_host,
-  enabled => true
+class { "quantum::server":
+  package_ensure       => $quantum_package_ensure,
+  auth_host            => $quantum_auth_host,
+  auth_password        => $quantum_admin_password,
 }
 
+# The CLI client
+class { "quantum::client": }
+
+# The plugin for the server
+class { "quantum::plugins::ovs":
+    package_ensure       => $quantum_package_ensure,
+    tenant_network_type  => $ovs_tenant_network_type,
+    network_vlan_ranges  => $ovs_network_vlan_ranges,
+    tunnel_id_ranges     => $ovs_tunnel_id_ranges,
+    sql_connection       => $ovs_sql_connection,
+}
+
+# The OVS database
 class { "quantum::db::mysql":
   password      => $quantum_db_password, 
   dbname        => $quantum_db_name,
@@ -460,9 +448,10 @@ class { "quantum::db::mysql":
   allowed_hosts => $quantum_db_allowed_hosts,
   charset       => $quantum_db_charset,
   cluster_id    => $quantum_db_cluster_id,
-}
+} -> Class["quantum::plugins::ovs"]
 
 
+# Tell keystone quantum should be permitted to connect as a service
 class { "quantum::keystone::auth":
   password           => $quantum_admin_password,
   auth_name          => $quantum_admin_username,
@@ -478,17 +467,32 @@ class { "quantum::keystone::auth":
 }
 
 class {"quantum::agents::l3":
+  package_ensure       => $quantum_package_ensure,
   interface_driver         => $l3_interface_driver, 
   use_namespaces           => $l3_use_namespaces,
   router_id                => $router_id,
   gateway_external_net_id  => $gateway_external_net_id,
   metadata_ip              => $l3_metadata_ip,
   external_network_bridge  => $external_network_bridge,
-  root_helper              => $root_helper,
+  root_helper              => $l3_root_helper,
+  auth_user                => $quantum_admin_username,
+  auth_password            => $quantum_admin_password,
+  auth_tenant              => $quantum_admin_tenant_name,
 }
 
+class { "quantum::agents::ovs":
+  package_ensure           => $quantum_package_ensure,
+  bridge_uplinks           => $ovs_bridge_uplinks,
+  bridge_mappings          => $ovs_bridge_mappings,
+  enable_tunneling         => $ovs_enable_tunneling,
+  local_ip                 => $ovs_local_ip,
+  integration_bridge       => $ovs_integration_bridge,
+  tunnel_bridge            => $ovs_tunnel_bridge,
+  root_helper              => $ovs_root_helper,
+}
 
 class {"quantum::agents::dhcp":
+  package_ensure       => $quantum_package_ensure,
   state_path         => $dhcp_state_path,
   interface_driver   => $dhcp_interface_driver,
   dhcp_driver        => $dhcp_driver,
