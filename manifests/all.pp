@@ -56,7 +56,7 @@ class openstack::all(
   # passing in the external ipaddress is required
   $external_address,
   $external_interface,
-  $private_interface,
+  $management_interface,
   $floating_range          = false,
   $fixed_range             = '10.0.0.0/24',
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
