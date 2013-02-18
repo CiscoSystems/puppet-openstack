@@ -54,8 +54,8 @@
 #
 class openstack::all(
   # passing in the external ipaddress is required
-  $external_address,
   $external_interface,
+  $management_address,
   $management_interface,
   $floating_range          = false,
   $fixed_range             = '10.0.0.0/24',
@@ -81,7 +81,7 @@ class openstack::all(
   $auto_assign_floating_ip = false,
   $purge_nova_config       = true,
   $libvirt_type            = 'kvm',
-  $nova_volume             = 'nova-volumes'
+  $nova_volume             = 'nova-volumes',
   # quantum config
   $network_api_class       = 'nova.network.quantumv2.api.API',
   $quantum_url             = 'http://127.0.0.1:9696',
@@ -213,7 +213,7 @@ class openstack::all(
   # set up keystone user, endpoint, service
   class { 'glance::keystone::auth':
     password => $glance_user_password,
-    public_address => $external_address,
+    public_address => $management_address,
   }
 
   # creat glance db/user/grants
@@ -257,7 +257,7 @@ class openstack::all(
 
   class { 'nova::keystone::auth':
     password => $nova_user_password,
-    public_address => $external_address,
+    public_address => $management_address,
   }
 
   class { 'nova::rabbitmq':
@@ -286,7 +286,7 @@ class openstack::all(
 
   # set up networking
   class { 'nova::network':
-    private_interface => $private_interface,
+    private_interface => $management_interface,
     public_interface  => $external_interface,
     fixed_range       => $fixed_range,
     floating_range    => $floating_range,
@@ -321,7 +321,7 @@ class openstack::all(
     enabled                       => true,
     vnc_enabled                   => true,
     vncserver_proxyclient_address => '127.0.0.1',
-    vncproxy_host                 => $external_address,
+    vncproxy_host                 => $management_address,
   }
 
   class { 'nova::compute::libvirt':
