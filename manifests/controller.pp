@@ -475,7 +475,6 @@ class {"quantum::agents::l3":
   metadata_ip              => $l3_metadata_ip,
   external_network_bridge  => $external_network_bridge,
   root_helper              => $l3_root_helper,
-#  auth_url                 => $quantum_admin_auth_url,
   auth_password            => $quantum_admin_password,
   auth_tenant              => $quantum_admin_tenant_name,
 }
