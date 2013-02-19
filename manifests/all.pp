@@ -285,6 +285,12 @@ class openstack::all(
   }
 
   # set up networking
+if $network_manager =~ /quantum/ {
+  #class { 'nova::network':
+  # enabled => false,
+  #}
+  notify {"Bypass nova network, quantum network mamager": }
+} else {
   class { 'nova::network':
     private_interface => $management_interface,
     public_interface  => $external_interface,
@@ -296,7 +302,7 @@ class openstack::all(
     config_overrides  => $network_config,
     create_networks   => true,
   }
-
+}
   if $auto_assign_floating_ip {
     nova_config { 'auto_assign_floating_ip':   value => 'True'; }
   }
