@@ -57,6 +57,7 @@ class openstack::all(
   $external_interface,
   $management_address,
   $management_interface,
+  $local_address           = '127.0.0.1',
   $floating_range          = false,
   $fixed_range             = '10.0.0.0/24',
   $network_manager         = 'nova.network.manager.FlatDHCPManager',
@@ -173,7 +174,7 @@ class openstack::all(
       config_hash => {
         # the priv grant fails on precise if I set a root password
         'root_password' => $mysql_root_password,
-        'bind_address'  => '0.0.0.0'
+        'bind_address'  => $management_address, 
       }
     }
   }
@@ -266,11 +267,11 @@ class openstack::all(
 
   class { 'nova::db::mysql':
     password => $nova_db_password,
-    host     => $management_address,
+    host     => $local_address,
   }
 
   class { 'nova':
-    sql_connection     => "mysql://nova:${nova_db_password}@${management_address}/nova",
+    sql_connection     => "mysql://nova:${nova_db_password}@${local_address}/nova",
     rabbit_userid      => $rabbit_user,
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
