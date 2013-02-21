@@ -93,7 +93,6 @@ class openstack::all(
   $quantum_ip_overlap           = false,
   $libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtOpenVswitchDriver',
   $libvirt_use_virtio_for_bridges       = 'True',
-  $host         = 'controller',
 #guantum general
   $quantum_enabled              = true,
   $quantum_package_ensure       = present,
@@ -174,7 +173,7 @@ class openstack::all(
       config_hash => {
         # the priv grant fails on precise if I set a root password
         'root_password' => $mysql_root_password,
-        'bind_address'  => '127.0.0.1'
+        'bind_address'  => '0.0.0.0'
       }
     }
   }
@@ -267,44 +266,21 @@ class openstack::all(
 
   class { 'nova::db::mysql':
     password => $nova_db_password,
-    host     => 'localhost',
+    host     => $management_address,
   }
 
   class { 'nova':
-    sql_connection     => "mysql://nova:${nova_db_password}@localhost/nova",
+    sql_connection     => "mysql://nova:${nova_db_password}@${management_address}/nova",
     rabbit_userid      => $rabbit_user,
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
-    glance_api_servers => '127.0.0.1:9292',
+    glance_api_servers => "${management_address}:9292",
     verbose            => $verbose,
   }
 
   class { 'nova::api':
     enabled        => true,
     admin_password => $nova_user_password,
-  }
-
-  # set up networking
-if $network_manager =~ /quantum/ {
-  #class { 'nova::network':
-  # enabled => false,
-  #}
-  notify {"Bypass nova network, quantum network mamager": }
-} else {
-  class { 'nova::network':
-    private_interface => $management_interface,
-    public_interface  => $external_interface,
-    fixed_range       => $fixed_range,
-    floating_range    => $floating_range,
-    install_service   => true,
-    enabled           => true,
-    network_manager   => $network_manager,
-    config_overrides  => $network_config,
-    create_networks   => true,
-  }
-}
-  if $auto_assign_floating_ip {
-    nova_config { 'auto_assign_floating_ip':   value => 'True'; }
   }
 
   # a bunch of nova services that require no configuration
@@ -325,28 +301,51 @@ if $network_manager =~ /quantum/ {
 
   class { 'nova::compute':
     enabled                       => true,
-    vnc_enabled                   => true,
-    vncserver_proxyclient_address => '127.0.0.1',
+    vnc_enabled                   => $vnc_enabled,
+    vncserver_proxyclient_address => $management_address,
     vncproxy_host                 => $management_address,
   }
 
   class { 'nova::compute::libvirt':
     libvirt_type     => $libvirt_type,
-    vncserver_listen => '127.0.0.1',
+    vncserver_listen => $management_address,
   }
 
   class { 'nova::volume::iscsi':
     volume_group     => $nova_volume,
-    iscsi_ip_address => '127.0.0.1',
+    iscsi_ip_address => $management_address,
   }
 
-#  nova::network::bridge { 'br100':
-#    ip      => '11.0.0.1',
-#    netmask => '255.255.255.0',
-#  }
+  # set up networking
+if $network_manager =~ /quantum/ {
+  $enable_network_service = false
+} 
 ### Nova Network Floating IPs ##
   if $auto_assign_floating_ip {
     nova_config { 'auto_assign_floating_ip':   value => 'True'; }
+  }
+
+# set up configuration for networking
+  class { 'nova::network':
+    private_interface => $management_interface,
+    public_interface  => $external_interface,
+    fixed_range       => $fixed_range,
+    floating_range    => false,
+    network_manager   => $network_manager,
+    config_overrides  => $network_config,
+    create_networks   => false,
+    enabled           => $enable_network_service,
+    install_service   => $enable_network_service,
+    network_api_class   => $network_api_class,
+    quantum_url => $quantum_url,
+    quantum_auth_strategy => $quantum_auth_strategy,
+    quantum_admin_tenant_name => $quantum_admin_tenant_name,
+    quantum_admin_username => $quantum_admin_username,
+    quantum_admin_password => $quantum_admin_password,
+    quantum_admin_auth_url => $quantum_admin_auth_url,
+    quantum_ip_overlap     => $quantum_ip_overlap,
+    libvirt_vif_driver => $libvirt_vif_driver,
+    libvirt_use_virtio_for_bridges => $libvirt_use_virtio_for_bridges,
   }
 
 ### Start Quantum Section ###
@@ -448,7 +447,7 @@ class {"quantum::agents::dhcp":
   ######## Horizon ########
 
   class { 'memcached':
-    listen_ip => '127.0.0.1',
+    listen_ip => $management_address,
   }
 
   class { 'horizon':
