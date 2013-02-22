@@ -45,10 +45,10 @@
 #    Optional. Defaults to nova-volumes.
 #
 class openstack::compute(
-  $private_interface,
-  $internal_address,
+  $management_interface,
+  $management_address,
   # networking config
-  $public_interface    = undef,
+  $external_interface    = undef,
   $fixed_range         = '10.0.0.0/16',
   $network_manager     = 'nova.network.manager.FlatDHCPManager',
   $multi_host          = false,
@@ -169,8 +169,8 @@ class openstack::compute(
 
   # set up configuration for networking
   class { 'nova::network':
-    private_interface => $private_interface,
-    public_interface  => $public_interface,
+    private_interface => $management_interface,
+    public_interface  => $external_interface,
     fixed_range       => $fixed_range,
     floating_range    => false,
     network_manager   => $network_manager,

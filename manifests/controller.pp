@@ -50,11 +50,11 @@
 #   implement services in active-passive modes for HA. Optional. Defaults to true.
 class openstack::controller(
   # my address
-  $public_address,
-  $public_interface,
-  $private_interface,
-  $internal_address,
-  $admin_address           = $internal_address,
+  $external_address,
+  $external_interface,
+  $management_interface,
+  $management_address,
+  $admin_address           = $management_address,
   # connection information
   $mysql_root_password     = undef,
   $admin_email             = 'some_user@some_fake_email_address.foo',
@@ -171,25 +171,25 @@ class openstack::controller(
 
 ) {
 
-  $glance_api_servers = "${internal_address}:9292"
-  $nova_db = "mysql://nova:${nova_db_password}@${internal_address}/nova"
+  $glance_api_servers = "${management_address}:9292"
+  $nova_db = "mysql://nova:${nova_db_password}@${management_address}/nova"
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    @@nova_config { 'rabbit_host': value => $internal_address }
+    @@nova_config { 'rabbit_host': value => $management_address }
     Nova_config <| title == 'rabbit_host' |>
     @@nova_config { 'sql_connection': value => $nova_db }
     Nova_config <| title == 'sql_connection' |>
     @@nova_config { 'glance_api_servers': value => $glance_api_servers }
     Nova_config <| title == 'glance_api_servers' |>
-    @@nova_config { 'novncproxy_base_url': value => "http://${public_address}:6080/vnc_auto.html" }
+    @@nova_config { 'novncproxy_base_url': value => "http://${external_address}:6080/vnc_auto.html" }
     $sql_connection    = false
     $glance_connection = false
     $rabbit_connection = false
   } else {
     $sql_connection    = $nova_db
     $glance_connection = $glance_api_servers
-    $rabbit_connection = $internal_address
+    $rabbit_connection = $management_address
   }
 
   ####### DATABASE SETUP ######
@@ -213,14 +213,14 @@ class openstack::controller(
     }
     Class['glance::db::mysql'] -> Class['glance::registry']
     class { 'glance::db::mysql':
-      host     => $internal_address,
+      host     => $management_address,
       password => $glance_db_password,
       allowed_hosts => '%',
     }
     # TODO should I allow all hosts to connect?
     class { 'nova::db::mysql':
       password      => $nova_db_password,
-      host          => $internal_address,
+      host          => $management_address,
       allowed_hosts => '%',
     }
   }
@@ -253,23 +253,23 @@ class openstack::controller(
     }
     # set up the keystone service and endpoint
     class { 'keystone::endpoint':
-      public_address   => $public_address,
-      internal_address => $internal_address,
+      public_address   => $external_address,
+      internal_address => $management_address,
       admin_address    => $admin_address,
     }
     # set up glance service,user,endpoint
     class { 'glance::keystone::auth':
       password         => $glance_user_password,
-      public_address   => $public_address,
-      internal_address => $internal_address,
+      public_address   => $external_address,
+      internal_address => $management_address,
       admin_address    => $admin_address,
       before           => [Class['glance::api'], Class['glance::registry']]
     }
     # set up nova serice,user,endpoint
     class { 'nova::keystone::auth':
       password         => $nova_user_password,
-      public_address   => $public_address,
-      internal_address => $internal_address,
+      public_address   => $external_address,
+      internal_address => $management_address,
       admin_address    => $admin_address,
       before           => Class['nova::api'],
     }
@@ -296,7 +296,7 @@ class openstack::controller(
     class { 'glance::backend::swift':
       swift_store_user => 'openstack:admin',
       swift_store_key => $admin_password,
-      swift_store_auth_address => "http://$internal_address:5000/v2.0/",
+      swift_store_auth_address => "http://$management_address:5000/v2.0/",
       swift_store_container => 'glance',
       swift_store_create_container_on_put => 'true'
     }
@@ -380,8 +380,8 @@ class openstack::controller(
 
   # set up networking
   class { 'nova::network':
-    private_interface => $private_interface,
-    public_interface  => $public_interface,
+    private_interface => $management_interface,
+    public_interface  => $external_interface,
     fixed_range       => $fixed_range,
     floating_range    => $floating_range,
     network_manager   => $network_manager,
