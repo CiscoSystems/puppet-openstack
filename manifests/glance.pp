@@ -47,8 +47,8 @@ class openstack::glance (
   $glance_db_dbname         = 'glance',
   $verbose                  = 'False',
   $glance_on_swift          = false,
-  $swift_store_user	    = 'admin:admin',
-  $swift_store_key          = 'keystone_admin',
+  $swift_store_user	    = undef,
+  $swift_store_key          = undef,
   $swift_store_auth_address = "http://${keystone_host}:5000/v2.0/",
   $enabled                  = true
 ) {
