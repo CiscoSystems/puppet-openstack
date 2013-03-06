@@ -250,12 +250,14 @@ class openstack::controller(
       email        => $admin_email,
       password     => $admin_password,
       admin_tenant => $keystone_admin_tenant,
+      before       => Class['nova::keystone::auth'],
     }
     # set up the keystone service and endpoint
     class { 'keystone::endpoint':
       public_address   => $public_address,
       internal_address => $internal_address,
       admin_address    => $admin_address,
+      before       => Class['nova::keystone::auth'],
     }
     # set up glance service,user,endpoint
     class { 'glance::keystone::auth':
