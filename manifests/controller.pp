@@ -265,8 +265,9 @@ class openstack::controller(
       admin_address    => $admin_address,
       before           => [Class['glance::api'], Class['glance::registry']]
     }
-    # set up nova serice,user,endpoint
+    # set up nova service,user,endpoint
     class { 'nova::keystone::auth':
+      require          => Service["keystone"],
       password         => $nova_user_password,
       public_address   => $public_address,
       internal_address => $internal_address,
