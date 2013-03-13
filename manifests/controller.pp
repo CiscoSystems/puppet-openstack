@@ -168,6 +168,12 @@ class openstack::controller(
   $dhcp_driver        = "quantum.agent.linux.dhcp.Dnsmasq",
   $dhcp_use_namespaces     = "False",
   $dhcp_root_helper        = "sudo /usr/bin/quantum-rootwrap /etc/quantum/rootwrap.conf",
+# cinder db
+  $cinder_enabled          = true,
+  $cinder_db_name          = 'cinder',
+  $cinder_db_password      = 'cinder',
+  $cinder_db_user          = 'cinder',
+  $cinder_user_password    = 'cinder_pass',
 
 ) {
 
@@ -318,6 +324,45 @@ class openstack::controller(
   }
 
   ######## END GLANCE ###########
+
+  ######## BEGIN CINDER ########
+  if $cinder_enabled {
+    class { 'cinder::db::mysql':
+      dbname            => $cinder_db_name,
+      user              => $cinder_db_user,
+      password          => $cinder_db_password,
+      host              => 'localhost',
+    }
+    # Tell nova to use Cinder
+    class { nova::cinder: }
+  }
+  class { 'cinder::setup_test_volume': }
+  class { 'cinder::api':
+    keystone_password => $cinder_user_password,
+    enabled           => $cinder_enabled,
+  }
+  class { 'cinder::scheduler':
+    enabled          => $cinder_enabled,
+  }
+  class { 'cinder::base':
+    rabbit_userid    => $rabbit_user,
+    rabbit_password  => $rabbit_password,
+    sql_connection   => "mysql://${cinder_db_user}:${cinder_db_password}@127.0.0.1/${cinder_db_name}",
+  }
+  class { 'cinder::volume':
+    enabled          => $cinder_enabled,
+  }
+  class { 'cinder::volume::iscsi':
+    iscsi_ip_address => $internal_address,
+
+  }
+  class { 'cinder::keystone::auth':
+      password         => $cinder_user_password,
+      public_address   => $public_address,
+      internal_address => $internal_address,
+      admin_address    => $admin_address,
+  }
+  ######## END CINDER ########
 
   ######## BEGIN NOVA ###########
 
