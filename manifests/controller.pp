@@ -334,7 +334,7 @@ class openstack::controller(
       host              => 'localhost',
     }
     # Tell nova to use Cinder
-    class { nova::cinder: }
+    # class { nova::cinder: }
   }
   class { 'cinder::setup_test_volume': }
   class { 'cinder::api':
