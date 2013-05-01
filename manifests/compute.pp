@@ -112,7 +112,13 @@ class openstack::compute(
   $ovs_local_ip             = "10.0.0.1",
   $ovs_server               = false,
   $ovs_root_helper          = "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
-  $ovs_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum"
+  $ovs_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum",
+# cinder db
+  $cinder_enabled          = true,
+  $cinder_db_name          = 'cinder',
+  $cinder_db_password      = 'cinder',
+  $cinder_db_user          = 'cinder',
+  $cinder_user_password    = 'cinder_pass',
 
 ) {
 
@@ -230,5 +236,22 @@ class openstack::compute(
       iscsi_ip_address => $internal_address,
     } 
   }
+
+  ######## BEGIN CINDER ########
+  if $cinder_enabled {
+    class { 'cinder::setup_test_volume': }
+    class { 'cinder::base':
+      rabbit_userid    => $rabbit_user,
+      rabbit_password  => $rabbit_password,
+      sql_connection   => "mysql://${cinder_db_user}:${cinder_db_password}@127.0.0.1/${cinder_db_name}",
+    }
+    class { 'cinder::volume':
+      enabled          => $cinder_enabled,
+    }
+    class { 'cinder::volume::iscsi':
+      iscsi_ip_address => $internal_address,
+    }
+  }
+  ######## END CINDER ########
 
 }
