@@ -66,8 +66,10 @@ class openstack::compute(
   $vncproxy_host       = false,
   $vnc_enabled         = 'true',
   $verbose             = false,
-  $manage_volumes      = false,
-  $nova_volume         = 'nova-volumes',
+  ## deprecated
+  # $manage_volumes      = false,
+  # $nova_volume         = 'nova-volumes',
+  ##
   $prevent_db_sync     = true,
   # quantum config
   $network_api_class       = 'nova.network.quantumv2.api.API',
@@ -112,7 +114,13 @@ class openstack::compute(
   $ovs_local_ip             = "10.0.0.1",
   $ovs_server               = false,
   $ovs_root_helper          = "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
-  $ovs_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum"
+  $ovs_sql_connection       = "mysql://quantum:quantum@172.29.74.194/quantum",
+# cinder db
+  $cinder_compute_enabled   = true,
+  $cinder_db_name              = 'cinder',
+  $cinder_db_password          = 'cinder',
+  $cinder_db_user              = 'cinder',
+  $cinder_user_password        = 'cinder_pass',
 
 ) {
 
@@ -219,16 +227,32 @@ class openstack::compute(
     root_helper              => $ovs_root_helper,
   }
 
-  if $manage_volumes {
-
-    class { 'nova::volume':
-      enabled => true, 
+  ######## BEGIN CINDER ########
+  if $cinder_compute_enabled {
+    class { 'cinder::base':
+      rabbit_userid    => $rabbit_user,
+      rabbit_password  => $rabbit_password,
+      sql_connection   => "mysql://${cinder_db_user}:${cinder_db_password}@127.0.0.1/${cinder_db_name}",
     }
-
-    class { 'nova::volume::iscsi':
-      volume_group     => $nova_volume,
-      iscsi_ip_address => $internal_address,
-    } 
+    if $cinder_storage_driver == 'netapp' {
+      class { 'cinder::volume::netapp':
+        $netapp_wsdl_url       = '',
+        $netapp_login          = '',
+        $netapp_password       = '',
+      }
+    }
+    elsif $cinder_storage_driver == 'nfs' {
+      class { 'cinder::volume::nfs':
+        $nfs_shares_config = '',
+      }
+    }
+    else {
+      class { 'cinder::volume::iscsi':
+        iscsi_ip_address => $internal_address,
+      }
+      class { 'cinder::setup_test_volume': }
+    }
   }
+  ######## END CINDER ########
 
 }
