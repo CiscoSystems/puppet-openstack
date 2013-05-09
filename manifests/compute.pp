@@ -122,6 +122,10 @@ class openstack::compute(
     vncserver_listen => $internal_address,
   }
 
+  class { 'nova::conductor':
+    enabled => true,
+  }
+
   # if the compute node should be configured as a multi-host
   # compute installation
   if $multi_host {
