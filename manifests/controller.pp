@@ -158,13 +158,13 @@ class openstack::controller(
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
-    @@nova_config { 'rabbit_host': value => $internal_address }
-    Nova_config <| title == 'rabbit_host' |>
-    @@nova_config { 'sql_connection': value => $nova_db }
-    Nova_config <| title == 'sql_connection' |>
-    @@nova_config { 'glance_api_servers': value => $glance_api_servers }
-    Nova_config <| title == 'glance_api_servers' |>
-    @@nova_config { 'novncproxy_base_url': value => "http://${public_address}:6080/vnc_auto.html" }
+    @@nova_config { 'DEFAULT/rabbit_host': value => $internal_address }
+    Nova_config <| title == 'DEFAULT/rabbit_host' |>
+    @@nova_config { 'DEFAULT/sql_connection': value => $nova_db }
+    Nova_config <| title == 'DEFAULT/sql_connection' |>
+    @@nova_config { 'DEFAULT/glance_api_servers': value => $glance_api_servers }
+    Nova_config <| title == 'DEFAULT/glance_api_servers' |>
+    @@nova_config { 'DEFAULT/novncproxy_base_url': value => "http://${public_address}:6080/vnc_auto.html" }
     $sql_connection    = false
     $glance_connection = false
     $rabbit_connection = false
@@ -384,7 +384,7 @@ class openstack::controller(
   }
 
   if $multi_host {
-    nova_config { 'multi_host':   value => 'True'; }
+    nova_config { 'DEFAULT/multi_host':   value => 'True'; }
     $enable_network_service = false
   } else {
     if $enabled == true {
@@ -502,7 +502,7 @@ class {"quantum::agents::dhcp":
 }
 
   if $auto_assign_floating_ip {
-    nova_config { 'auto_assign_floating_ip':   value => 'True'; }
+    nova_config { 'DEFAULT/auto_assign_floating_ip':   value => 'True'; }
   }
 
   ######## Horizon ########
