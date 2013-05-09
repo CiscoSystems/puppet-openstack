@@ -215,8 +215,8 @@ class openstack::controller(
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
     bind_host    => '0.0.0.0',
-    log_verbose  => $verbose,
-    log_debug    => $verbose,
+    verbose  => $verbose,
+    debug    => $verbose,
     catalog_type => 'sql',
     enabled      => $enabled,
   }
@@ -264,8 +264,8 @@ class openstack::controller(
 
 
   class { 'glance::api':
-    log_verbose       => $verbose,
-    log_debug         => $verbose,
+    verbose       => $verbose,
+    debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => '127.0.0.1',
     auth_port         => '35357',
@@ -287,8 +287,8 @@ class openstack::controller(
     class { 'glance::backend::file': }
   }
   class { 'glance::registry':
-    log_verbose       => $verbose,
-    log_debug         => $verbose,
+    verbose       => $verbose,
+    debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => '127.0.0.1',
     auth_port         => '35357',
