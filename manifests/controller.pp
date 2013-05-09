@@ -155,6 +155,7 @@ class openstack::controller(
 
   $glance_api_servers = "${internal_address}:9292"
   $nova_db = "mysql://nova:${nova_db_password}@${internal_address}/nova"
+  $keystone_db = "mysql://keystone_admin:${keystone_db_password}@127.0.0.1/keystone"
 
   if ($export_resources) {
     # export all of the things that will be needed by the clients
@@ -211,7 +212,8 @@ class openstack::controller(
 
   # set up keystone
   class { 'keystone':
-    admin_token  => $keystone_admin_token,
+    admin_token    => $keystone_admin_token,
+    sql_connection => $keystone_db,
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
     bind_host    => '0.0.0.0',
@@ -219,11 +221,6 @@ class openstack::controller(
     debug    => $verbose,
     catalog_type => 'sql',
     enabled      => $enabled,
-  }
-  # set up keystone database
-  # set up the keystone config for mysql
-  class { 'keystone::config::mysql':
-    password => $keystone_db_password,
   }
 
   if ($enabled) {
