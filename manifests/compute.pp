@@ -106,7 +106,6 @@ class openstack::compute(
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_api_servers,
-    prevent_db_sync    => $prevent_db_sync,
     verbose            => $verbose,
   }
 
@@ -142,6 +141,7 @@ class openstack::compute(
       admin_tenant_name => 'services',
       admin_user        => 'nova',
       admin_password    => $nova_user_password,
+      db_sync           => false,
     }
   } else {
     $enable_network_service = false
