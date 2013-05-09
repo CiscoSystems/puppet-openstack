@@ -4,9 +4,7 @@
 #
 # $export_resources - Whether resources should be exported
 #
-# [public_interface] Public interface used to route public traffic. Required.
 # [public_address] Public address for public endpoints. Required.
-# [private_interface] Interface used for vm networking connectivity. Required.
 # [internal_address] Internal address used for management. Required.
 # [mysql_root_password] Root password for mysql server.
 # [admin_email] Admin email.
@@ -19,18 +17,11 @@
 # [nova_user_password] Nova service password.
 # [rabbit_password] Rabbit password.
 # [rabbit_user] Rabbit User.
-# [network_manager] Nova network manager to use.
-# [fixed_range] Range of ipv4 network for vms.
-# [floating_range] Floating ip range to create.
-# [create_networks] Rather network and floating ips should be created.
-# [num_networks] Number of networks that fixed range should be split into.
 # [multi_host] Rather node should support multi-host networking mode for HA.
 #   Optional. Defaults to false.
 # [auto_assign_floating_ip] Rather configured to automatically allocate and
 #   assign a floating IP address to virtual instances when they are launched.
 #   Defaults to false.
-# [network_config] Hash that can be used to pass implementation specifc
-#   network settings. Optioal. Defaults to {}
 # [verbose] Rahter to log services at verbose.
 # [export_resources] Rather to export resources.
 # Horizon related config - assumes puppetlabs-horizon code
@@ -51,8 +42,6 @@
 class openstack::controller(
   # my address
   $public_address,
-  $public_interface,
-  $private_interface,
   $internal_address,
   $admin_address           = $internal_address,
   # connection information
@@ -70,19 +59,9 @@ class openstack::controller(
   $rabbit_password         = 'rabbit_pw',
   $rabbit_user             = 'nova',
   # network configuration
-  # this assumes that it is a flat network manager
-  $network_manager         = 'nova.network.manager.FlatDHCPManager',
   # this number has been reduced for performance during testing
-  $fixed_range             = '10.0.0.0/16',
-  $floating_range          = false,
-  $create_networks         = false,
-  $num_networks            = 1,
   $multi_host              = false,
   $auto_assign_floating_ip = false,
-  # TODO need to reconsider this design...
-  # this is where the config options that are specific to the network
-  # types go. I am not extremely happy with this....
-  $network_config          = {},
   # I do not think that this needs a bridge?
   $verbose                 = false,
   $export_resources        = true,
@@ -98,14 +77,11 @@ class openstack::controller(
   # quantum config
   $network_api_class       = 'nova.network.quantumv2.api.API',
   $quantum_url             = 'http://127.0.0.1:9696',
-  $quantum_auth_strategy   = 'keystone',
   $quantum_admin_tenant_name    = 'services',
   $quantum_admin_username       = 'quantum',
   $quantum_admin_password       = 'quantum',
   $quantum_admin_auth_url       = 'http://127.0.0.1:35357/v2.0',
   $quantum_ip_overlap           = false,
-  $libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtOpenVswitchDriver',
-  $libvirt_use_virtio_for_bridges       = 'True',
   $host         = 'controller',
 #guantum general
   $quantum_enabled              = true,
@@ -418,34 +394,13 @@ class openstack::controller(
     }
   }
 
-  if $enabled {
-    $really_create_networks = $create_networks
-  } else {
-    $really_create_networks = false
-  }
-
   # set up networking
-  class { 'nova::network':
-    private_interface => $private_interface,
-    public_interface  => $public_interface,
-    fixed_range       => $fixed_range,
-    floating_range    => $floating_range,
-    network_manager   => $network_manager,
-    config_overrides  => $network_config,
-    create_networks   => $really_create_networks,
-    num_networks      => $num_networks,
-    enabled           => $enable_network_service,
-    install_service   => $enable_network_service,
-    network_api_class	=> $network_api_class,
-    quantum_url => $quantum_url,
-    quantum_auth_strategy => $quantum_auth_strategy,
+  class { 'nova::network::quantum':
+    quantum_admin_password    => $quantum_admin_password,
+    quantum_url               => $quantum_url,
     quantum_admin_tenant_name => $quantum_admin_tenant_name,
-    quantum_admin_username => $quantum_admin_username,
-    quantum_admin_password => $quantum_admin_password,
-    quantum_admin_auth_url => $quantum_admin_auth_url,
-    quantum_ip_overlap     => $quantum_ip_overlap,
-    libvirt_vif_driver => $libvirt_vif_driver,
-    libvirt_use_virtio_for_bridges => $libvirt_use_virtio_for_bridges,
+    quantum_admin_username    => $quantum_admin_username,
+    quantum_admin_auth_url    => $quantum_admin_auth_url,
   }
 
 

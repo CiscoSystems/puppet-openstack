@@ -10,12 +10,7 @@
 # TODO - I need to make the choise of networking configurable
 #
 #
-# [private_interface] Interface used for vm networking connectivity. Required.
 # [internal_address] Internal address used for management. Required.
-# [public_interface] Public interface used to route public traffic. Optional.
-#   Defaults to false.
-# [fixed_range] Range of ipv4 network for vms.
-# [network_manager] Nova network manager to use.
 # [multi_host] Rather node should support multi-host networking mode for HA.
 #   Optional. Defaults to false.
 # [network_config] Hash that can be used to pass implementation specifc
@@ -45,14 +40,9 @@
 #    Optional. Defaults to nova-volumes.
 #
 class openstack::compute(
-  $private_interface,
   $internal_address,
   # networking config
-  $public_interface    = undef,
-  $fixed_range         = '10.0.0.0/16',
-  $network_manager     = 'nova.network.manager.FlatDHCPManager',
   $multi_host          = false,
-  $network_config      = {},
   # my address
   # conection information
   $sql_connection      = false,
@@ -70,17 +60,10 @@ class openstack::compute(
   $nova_volume         = 'nova-volumes',
   $prevent_db_sync     = true,
   # quantum config
-  $network_api_class       = 'nova.network.quantumv2.api.API',
-  $quantum_url             = 'http://172.29.74.194:9696',
-  $quantum_auth_strategy   = 'keystone',
+  $quantum_url             = 'http://127.0.0.1:9696',
   $quantum_admin_tenant_name    = 'services',
   $quantum_admin_username       = 'quantum',
   $quantum_admin_password       = 'quantum',
-  $quantum_admin_auth_url       = 'http://172.29.74.194:35357/v2.0',
-  $quantum_ip_overlap           = false,
-  $libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtOpenVswitchDriver',
-  $libvirt_use_virtio_for_bridges       = 'True',
-  $host         = 'compute',
 #quantum general
   $quantum_enabled              = true,
   $quantum_package_ensure       = present,
@@ -167,27 +150,12 @@ class openstack::compute(
     }
   }
 
-  # set up configuration for networking
-  class { 'nova::network':
-    private_interface => $private_interface,
-    public_interface  => $public_interface,
-    fixed_range       => $fixed_range,
-    floating_range    => false,
-    network_manager   => $network_manager,
-    config_overrides  => $network_config,
-    create_networks   => false,
-    enabled           => $enable_network_service,
-    install_service   => $enable_network_service,
-    network_api_class	=> $network_api_class,
-    quantum_url => $quantum_url,
-    quantum_auth_strategy => $quantum_auth_strategy,
+  class { 'nova::network::quantum':
+    quantum_admin_password    => $quantum_admin_password,
+    quantum_url               => $quantum_url,
     quantum_admin_tenant_name => $quantum_admin_tenant_name,
-    quantum_admin_username => $quantum_admin_username,
-    quantum_admin_password => $quantum_admin_password,
-    quantum_admin_auth_url => $quantum_admin_auth_url,
-    quantum_ip_overlap     => $quantum_ip_overlap,
-    libvirt_vif_driver => $libvirt_vif_driver,
-    libvirt_use_virtio_for_bridges => $libvirt_use_virtio_for_bridges, 
+    quantum_admin_username    => $quantum_admin_username,
+    quantum_admin_auth_url    => $quantum_admin_auth_url,
   }
 
   class { "quantum":
