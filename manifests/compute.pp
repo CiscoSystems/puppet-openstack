@@ -190,14 +190,25 @@ class openstack::compute(
 
   if $manage_volumes {
 
-    class { 'nova::volume':
-      enabled => true, 
+    # TODO this is probably just for testing?
+    class { 'cinder::setup_test_volume': }
+
+    class { 'cinder::base':
+      rabbit_password => $rabbit_password,
+      rabbit_host     => $rabbit_host,
+      sql_connection  => $sql_connection,
+      verbose         => $verbose,
     }
 
-    class { 'nova::volume::iscsi':
-      volume_group     => $nova_volume,
-      iscsi_ip_address => $internal_address,
-    } 
+    # Install / configure nova-volume
+    class { 'cinder::volume':
+      enabled => $enabled,
+    }
+    if $enabled {
+      class { 'cinder::volume::iscsi':
+        volume_group     => $nova_volume,
+      }
+    }
   }
 
 }
