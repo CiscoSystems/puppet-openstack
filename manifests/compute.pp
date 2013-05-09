@@ -58,13 +58,13 @@ class openstack::compute(
   $verbose             = false,
   $manage_volumes      = false,
   $nova_volume         = 'nova-volumes',
-  $prevent_db_sync     = true,
   # quantum config
   $quantum_url             = 'http://127.0.0.1:9696',
   $quantum_admin_tenant_name    = 'services',
   $quantum_admin_username       = 'quantum',
   $quantum_admin_password       = 'quantum',
-#quantum general
+  $quantum_admin_auth_url       = 'http://127.0.0.1:35357/v2.0',
+  # quantum general
   $quantum_enabled              = true,
   $quantum_package_ensure       = present,
   $quantum_log_verbose          = "True",
@@ -129,9 +129,6 @@ class openstack::compute(
     include keystone::python
 
     nova_config {
-    }
-    if ! $public_interface {
-      fail('public_interface must be defined for multi host compute nodes')
       'DEFAULT/multi_host':        value => 'True';
       'DEFAULT/send_arp_for_ha':   value => 'True';
     }
@@ -159,8 +156,8 @@ class openstack::compute(
   }
 
   class { "quantum":
-    enabled              => $quantum_enabled, 
-    package_ensure       => $quantum_package_ensure, 
+    enabled              => $quantum_enabled,
+    package_ensure       => $quantum_package_ensure,
     verbose              => $quantum_log_verbose,
     debug                => $quantum_log_debug,
     bind_host            => $quantum_bind_host,

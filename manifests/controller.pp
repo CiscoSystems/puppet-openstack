@@ -22,7 +22,6 @@
 # [auto_assign_floating_ip] Rather configured to automatically allocate and
 #   assign a floating IP address to virtual instances when they are launched.
 #   Defaults to false.
-# [verbose] Rahter to log services at verbose.
 # [export_resources] Rather to export resources.
 # Horizon related config - assumes puppetlabs-horizon code
 # [secret_key]          secret key to encode cookies, …
@@ -75,14 +74,11 @@ class openstack::controller(
   $horizon_top_links       = false,
   $enabled                 = true,
   # quantum config
-  $network_api_class       = 'nova.network.quantumv2.api.API',
   $quantum_url             = 'http://127.0.0.1:9696',
   $quantum_admin_tenant_name    = 'services',
   $quantum_admin_username       = 'quantum',
   $quantum_admin_password       = 'quantum',
   $quantum_admin_auth_url       = 'http://127.0.0.1:35357/v2.0',
-  $quantum_ip_overlap           = false,
-  $host         = 'controller',
 #guantum general
   $quantum_enabled              = true,
   $quantum_package_ensure       = present,
@@ -135,7 +131,6 @@ class openstack::controller(
   $l3_use_namespaces           = "False",
   $l3_router_id                = "7e5c2aca-bbac-44dd-814d-f2ea9a4003e4",
   $l3_gateway_external_net_id  = "3f8699d7-f221-421a-acf5-e41e88cfd54f",
-  $l3_metadata_ip              = "169.254.169.254",
   $l3_external_network_bridge  = "br-ex",
   $l3_root_helper              = "sudo /usr/bin/quantum-rootwrap /etc/quantum/rootwrap.conf",
 #quantum dhcp
@@ -401,102 +396,98 @@ class openstack::controller(
   }
 
 
-class { "quantum":
-  enabled              => $quantum_enabled,
-  package_ensure       => $quantum_package_ensure,
-  verbose              => $quantum_log_verbose,
-  debug                => $quantum_log_debug,
-  bind_host            => $quantum_bind_host,
-  bind_port            => $quantum_bind_port,
-  rabbit_host          => $quantum_rabbit_host,
-  rabbit_port          => $quantum_rabbit_port,
-  rabbit_user          => $quantum_rabbit_user,
-  rabbit_password      => $quantum_rabbit_password,
-  rabbit_virtual_host  => $quantum_rabbit_virtual_host,
-  control_exchange     => $quantum_control_exchange,
-  core_plugin            => $quantum_core_plugin,
-  mac_generation_retries => $quantum_mac_generation_retries,
-  dhcp_lease_duration    => $quantum_dhcp_lease_duration,
-}
+  class { "quantum":
+    enabled                => $quantum_enabled,
+    package_ensure         => $quantum_package_ensure,
+    verbose                => $quantum_log_verbose,
+    debug                  => $quantum_log_debug,
+    bind_host              => $quantum_bind_host,
+    bind_port              => $quantum_bind_port,
+    rabbit_host            => $quantum_rabbit_host,
+    rabbit_port            => $quantum_rabbit_port,
+    rabbit_user            => $quantum_rabbit_user,
+    rabbit_password        => $quantum_rabbit_password,
+    rabbit_virtual_host    => $quantum_rabbit_virtual_host,
+    control_exchange       => $quantum_control_exchange,
+    core_plugin            => $quantum_core_plugin,
+    mac_generation_retries => $quantum_mac_generation_retries,
+    dhcp_lease_duration    => $quantum_dhcp_lease_duration,
+  }
 
-class { "quantum::server":
-  package_ensure       => $quantum_package_ensure,
-  auth_host            => $quantum_auth_host,
-  auth_password        => $quantum_admin_password,
-}
+  class { "quantum::server":
+    package_ensure       => $quantum_package_ensure,
+    auth_host            => $quantum_auth_host,
+    auth_password        => $quantum_admin_password,
+  }
 
-# The CLI client
-class { "quantum::client": }
+  # The CLI client
+  class { "quantum::client": }
 
-# The plugin for the server
-class { "quantum::plugins::ovs":
+  # The plugin for the server
+  class { "quantum::plugins::ovs":
     package_ensure       => $quantum_package_ensure,
     tenant_network_type  => $ovs_tenant_network_type,
     network_vlan_ranges  => $ovs_network_vlan_ranges,
     tunnel_id_ranges     => $ovs_tunnel_id_ranges,
     sql_connection       => $ovs_sql_connection,
-}
+  }
 
-# The OVS database
-class { "quantum::db::mysql":
-  password      => $quantum_db_password, 
-  dbname        => $quantum_db_name,
-  user          => $quantum_db_user,
-  host          => $quantum_db_host,
-  allowed_hosts => $quantum_db_allowed_hosts,
-  charset       => $quantum_db_charset,
-  cluster_id    => $quantum_db_cluster_id,
-} -> Class["quantum::plugins::ovs"]
+  # The OVS database
+  class { "quantum::db::mysql":
+    password      => $quantum_db_password,
+    dbname        => $quantum_db_name,
+    user          => $quantum_db_user,
+    host          => $quantum_db_host,
+    allowed_hosts => $quantum_db_allowed_hosts,
+    charset       => $quantum_db_charset,
+    cluster_id    => $quantum_db_cluster_id,
+  } -> Class["quantum::plugins::ovs"]
 
 
-# Tell keystone quantum should be permitted to connect as a service
-class { "quantum::keystone::auth":
-  password           => $quantum_admin_password,
-  auth_name          => $quantum_admin_username,
-  email              => $quantum_email,
-  tenant             => $quantum_admin_tenant_name,
-  configure_endpoint => true,
-  service_type       => 'network',
-  public_address     => $quantum_public_address,
-  admin_address      => $quantum_admin_address,
-  internal_address   => $quantum_internal_address,
-  port               => $quantum_port,
-  region             => $quantum_region,
-}
+  # Tell keystone quantum should be permitted to connect as a service
+  class { "quantum::keystone::auth":
+    password           => $quantum_admin_password,
+    auth_name          => $quantum_admin_username,
+    email              => $quantum_email,
+    tenant             => $quantum_admin_tenant_name,
+    configure_endpoint => true,
+    service_type       => 'network',
+    public_address     => $quantum_public_address,
+    admin_address      => $quantum_admin_address,
+    internal_address   => $quantum_internal_address,
+    port               => $quantum_port,
+    region             => $quantum_region,
+  }
 
-class {"quantum::agents::l3":
-  package_ensure       => $quantum_package_ensure,
-  interface_driver         => $l3_interface_driver, 
-  use_namespaces           => $l3_use_namespaces,
-  router_id                => $router_id,
-  gateway_external_net_id  => $gateway_external_net_id,
-  metadata_ip              => $l3_metadata_ip,
-  external_network_bridge  => $external_network_bridge,
-  root_helper              => $l3_root_helper,
-  auth_user                => $quantum_admin_username,
-  auth_password            => $quantum_admin_password,
-  auth_tenant              => $quantum_admin_tenant_name,
-}
+  class {"quantum::agents::l3":
+    package_ensure              => $quantum_package_ensure,
+    interface_driver            => $l3_interface_driver,
+    use_namespaces              => $l3_use_namespaces,
+    router_id                   => $router_id,
+    gateway_external_network_id => $gateway_external_net_id,
+    external_network_bridge     => $external_network_bridge,
+    root_helper                 => $l3_root_helper,
+  }
 
-class { "quantum::agents::ovs":
-  package_ensure           => $quantum_package_ensure,
-  bridge_uplinks           => $ovs_bridge_uplinks,
-  bridge_mappings          => $ovs_bridge_mappings,
-  enable_tunneling         => $ovs_enable_tunneling,
-  local_ip                 => $ovs_local_ip,
-  integration_bridge       => $ovs_integration_bridge,
-  tunnel_bridge            => $ovs_tunnel_bridge,
-  root_helper              => $ovs_root_helper,
-}
+  class { "quantum::agents::ovs":
+    package_ensure           => $quantum_package_ensure,
+    bridge_uplinks           => $ovs_bridge_uplinks,
+    bridge_mappings          => $ovs_bridge_mappings,
+    enable_tunneling         => $ovs_enable_tunneling,
+    local_ip                 => $ovs_local_ip,
+    integration_bridge       => $ovs_integration_bridge,
+    tunnel_bridge            => $ovs_tunnel_bridge,
+    root_helper              => $ovs_root_helper,
+  }
 
-class {"quantum::agents::dhcp":
-  package_ensure       => $quantum_package_ensure,
-  state_path         => $dhcp_state_path,
-  interface_driver   => $dhcp_interface_driver,
-  dhcp_driver        => $dhcp_driver,
-  use_namespaces     => $dhcp_use_namespaces,
-  root_helper        => $dhcp_root_helper,
-}
+  class {"quantum::agents::dhcp":
+    package_ensure       => $quantum_package_ensure,
+    state_path         => $dhcp_state_path,
+    interface_driver   => $dhcp_interface_driver,
+    dhcp_driver        => $dhcp_driver,
+    use_namespaces     => $dhcp_use_namespaces,
+    root_helper        => $dhcp_root_helper,
+  }
 
   if $auto_assign_floating_ip {
     nova_config { 'DEFAULT/auto_assign_floating_ip':   value => 'True'; }
