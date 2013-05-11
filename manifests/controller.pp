@@ -98,6 +98,7 @@ class openstack::controller(
   $quantum_core_plugin            = "quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2",
   $quantum_mac_generation_retries = 16,
   $quantum_dhcp_lease_duration    = 120,
+  $quantum_metadata_secret        = 'secret'
 #quantum ovs
   $ovs_bridge_uplinks      = ['br-ex:eth0.40'],
   $ovs_bridge_mappings      = ['default:br-ex'],
@@ -363,6 +364,7 @@ class openstack::controller(
     admin_tenant_name => 'services',
     admin_user        => 'nova',
     admin_password    => $nova_user_password,
+    quantum_metadata_proxy_shared_secret => $quantum_metadata_secret,
   }
 
   class { [
@@ -422,6 +424,14 @@ class openstack::controller(
 
   # The CLI client
   class { "quantum::client": }
+
+  class { 'quantum::agents::metadata':
+    auth_password => $quantum_admin_password,
+    shared_secret => $quantum_metadata_secret,
+    auth_tenant   => $quantum_admin_tenant_name,
+    auth_user     => $quantum_admin_username,
+    auth_url      => 'http://localhost:35357/v2.0',
+  }
 
   # The plugin for the server
   class { "quantum::plugins::ovs":
