@@ -31,8 +31,8 @@
 #   Defaults to false.
 # [network_config] Hash that can be used to pass implementation specifc
 #   network settings. Optioal. Defaults to {}
-# [verbose] Boolean. If true, services log verbose. Services can also log
-#   by exchanging "verbose" with "debug"
+# [verbose] (bool) If true, services log verbosely. Services can also log
+#   debug by exchanging "verbose" with "debug"
 # [export_resources] Rather to export resources.
 # Horizon related config - assumes puppetlabs-horizon code
 # [secret_key]          secret key to encode cookies, …
