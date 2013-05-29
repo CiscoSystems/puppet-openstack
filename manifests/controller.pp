@@ -31,7 +31,7 @@
 #   Defaults to false.
 # [network_config] Hash that can be used to pass implementation specifc
 #   network settings. Optioal. Defaults to {}
-# [verbose] Rahter to log services at verbose.
+# [verbose] (bool) If true, log verbosely
 # [export_resources] Rather to export resources.
 # Horizon related config - assumes puppetlabs-horizon code
 # [secret_key]          secret key to encode cookies, …
@@ -239,16 +239,17 @@ class openstack::controller(
     # we are binding keystone on all interfaces
     # the end user may want to be more restrictive
     bind_host    => '0.0.0.0',
-    log_verbose  => $verbose,
-    log_debug    => $verbose,
+    verbose  => $verbose,
+    # debug    => $verbose,
     catalog_type => 'sql',
     enabled      => $enabled,
   }
   # set up keystone database
   # set up the keystone config for mysql
-  class { 'keystone::config::mysql':
-    password => $keystone_db_password,
-  }
+  # this appears to be done on 219 already
+  #class { 'keystone::config::mysql':
+  #  password => $keystone_db_password,
+  #}
 
   if ($enabled) {
     # set up keystone admin users
@@ -288,8 +289,8 @@ class openstack::controller(
 
 
   class { 'glance::api':
-    log_verbose       => $verbose,
-    log_debug         => $verbose,
+    verbose       => $verbose,
+    # debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => '127.0.0.1',
     auth_port         => '35357',
@@ -311,8 +312,8 @@ class openstack::controller(
     class { 'glance::backend::file': }
   }
   class { 'glance::registry':
-    log_verbose       => $verbose,
-    log_debug         => $verbose,
+    verbose       => $verbose,
+    # debug         => $verbose,
     auth_type         => 'keystone',
     auth_host         => '127.0.0.1',
     auth_port         => '35357',
