@@ -15,7 +15,9 @@ define openstack::apt(
   $repos   = 'main',
   $key = undef,
   $key_source = undef,
-  $pin_spec = undef) {
+  $key_content = undef,
+  $pin_spec = undef,
+  $proxy = undef) {
 
     if ($location =~ /^ppa:(\S+)\/(\S+)/) {
       $ppa_owner = "$1"
@@ -32,7 +34,9 @@ define openstack::apt(
         release           => $release,
         repos             => $repos,
         key               => $key,
+        key_content       => $key_content,
         key_source        => $key_source,
+        proxy             => $proxy,
         include_src       => false,
       } -> Package <| tag == "openstack" |>
       if ($pin_spec != undef) {
