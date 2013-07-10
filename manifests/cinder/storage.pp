@@ -46,7 +46,15 @@ class openstack::cinder::storage(
         volume_name => $volume_group,
       }
     }
-  } else {
+  }
+  elsif $volume_driver == 'rbd' {
+    class { 'cinder::volume::rbd':
+      rbd_pool        => $::rbd_pool,
+      rbd_user        => $::rbd_user,
+      rbd_secret_uuid => $::ceph_monitor_secret,
+    }
+  }
+  else {
     warning("Unsupported volume driver: ${volume_driver}, make sure you are configuring this yourself")
   }
 }
