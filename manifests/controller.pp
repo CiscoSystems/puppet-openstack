@@ -25,6 +25,10 @@
 #   Whether unmanaged nova.conf entries should be purged.
 #   (optional) Defaults to false.
 #
+# [nova_bind_address]
+#   IP address to use for binding Nova API's.
+#   (optional) Defualts to '0.0.0.0'.
+#
 # [rabbit_password] Rabbit password.
 # [rabbit_user] Rabbit User. Optional. Defaults to openstack.
 # [rabbit_virtual_host] Rabbit virtual host path for Nova. Defaults to '/'.
@@ -51,9 +55,30 @@
 #   The next is an array of arrays, that can be used to add call-out links to the dashboard for other apps.
 #   There is no specific requirement for these apps to be for monitoring, that's just the defacto purpose.
 #   Each app is defined in two parts, the display name, and the URI
+#
+# [ovs_enable_tunneling]
+#   Enable/disable the Quantum OVS GRE tunneling networking mode.
+#   Optional.  Defaults to true.
+#
 # [metadata_shared_secret]
 #   Shared secret used by nova and quantum to authenticate metadata.
 #   (optional) Defaults to false.
+#
+# [physical_network]
+#   Unique name of the physical network used by the Quantum OVS Agent.
+#   All physical networks listed are available for flat and VLAN
+#   provider network creation.
+#
+# [tenant_network_type]
+#   Type of network to allocate for tenant networks
+#   Optional. Defualts to 'gre'.
+#
+# [network_vlan_ranges]
+#   Comma-separated list of <physical_network>[:<vlan_min>:<vlan_max>]
+#   tuples enumerating ranges of VLAN IDs on named physical networks
+#   that are available for allocation.  Only applicable when tenant_network_type
+#   parameter is set to 'vlan'.
+#   Optional. Defaults to 'physnet1:
 #
 # [firewall_driver]
 #   Driver used to implement firewall rules.
@@ -109,6 +134,7 @@ class openstack::controller (
   $nova_db_password,
   $nova_user_password,
   $secret_key,
+  $mysql_root_password,
   # cinder and quantum password are not required b/c they are
   # optional. Not sure what to do about this.
   $quantum_user_password   = false,
@@ -119,7 +145,6 @@ class openstack::controller (
   # Database
   $db_host                 = '127.0.0.1',
   $db_type                 = 'mysql',
-  $mysql_root_password     = 'sql_pass',
   $mysql_account_security  = true,
   $mysql_bind_address      = '0.0.0.0',
   $sql_idle_timeout        = undef,
@@ -146,6 +171,7 @@ class openstack::controller (
   $nova_db_dbname          = 'nova',
   $purge_nova_config       = false,
   $enabled_apis            = 'ec2,osapi_compute,metadata',
+  $nova_bind_address       = '0.0.0.0',
   # Nova Networking
   $public_interface        = false,
   $private_interface       = false,
@@ -182,6 +208,11 @@ class openstack::controller (
   $cinder_bind_address     = '0.0.0.0',
   # Quantum
   $quantum                 = true,
+  $physical_network        = 'default',
+  $tenant_network_type     = 'gre',
+  $ovs_enable_tunneling    = true,
+  $ovs_local_ip            = false,
+  $network_vlan_ranges     = 'physnet1:1000:2000',
   $bridge_interface        = undef,
   $external_bridge_name    = 'br-ex',
   $enable_ovs_agent        = true,
@@ -194,7 +225,6 @@ class openstack::controller (
   $quantum_db_name         = 'quantum',
   $quantum_auth_url        = 'http://127.0.0.1:35357/v2.0',
   $enable_quantum_server   = true,
-  $ovs_local_ip            = false,
   # swift
   $swift                   = false,
   $swift_public_address    = false,
@@ -353,6 +383,7 @@ class openstack::controller (
     nova_db_user            => $nova_db_user,
     nova_db_dbname          => $nova_db_dbname,
     enabled_apis            => $enabled_apis,
+    api_bind_address        => $nova_bind_address,
     # Rabbit
     rabbit_user             => $rabbit_user,
     rabbit_password         => $rabbit_password,
@@ -393,9 +424,12 @@ class openstack::controller (
       rabbit_password       => $rabbit_password,
       rabbit_virtual_host   => $rabbit_virtual_host,
       # Quantum OVS
+      tenant_network_type   => $tenant_network_type,
+      network_vlan_ranges   => $network_vlan_ranges,
+      ovs_enable_tunneling  => $ovs_enable_tunneling,
       ovs_local_ip          => $ovs_local_ip_real,
       bridge_uplinks        => ["${external_bridge_name}:${bridge_interface}"],
-      bridge_mappings       => ["default:${external_bridge_name}"],
+      bridge_mappings       => ["${physical_network}:${external_bridge_name}"],
       enable_ovs_agent      => $enable_ovs_agent,
       firewall_driver       => $firewall_driver,
       # Database

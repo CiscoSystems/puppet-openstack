@@ -17,11 +17,13 @@ describe 'openstack::controller' do
       :keystone_admin_token    => 'keystone_admin_token',
       :glance_db_password      => 'glance_pass',
       :glance_user_password    => 'glance_pass',
+      :nova_bind_address       => '0.0.0.0',
       :nova_db_password        => 'nova_pass',
       :nova_user_password      => 'nova_pass',
       :cinder_db_password      => 'cinder_pass',
       :cinder_user_password    => 'cinder_pass',
       :secret_key              => 'secret_key',
+      :mysql_root_password     => 'sql_pass',
       :quantum                 => false,
       :vncproxy_host           => '10.0.0.1',
       :nova_admin_tenant_name  => 'services',
@@ -393,7 +395,8 @@ describe 'openstack::controller' do
           :admin_tenant_name => 'services',
           :admin_user        => 'nova',
           :admin_password    => 'nova_pass',
-          :enabled_apis      => 'ec2,osapi_compute,metadata'
+          :enabled_apis      => 'ec2,osapi_compute,metadata',
+          :api_bind_address  => '0.0.0.0'
         )
         should contain_class('nova::cert').with(:enabled => true)
         should contain_class('nova::consoleauth').with(:enabled => true)
@@ -550,6 +553,9 @@ describe 'openstack::controller' do
           :rabbit_user           => 'openstack',
           :rabbit_password       => 'rabbit_pw',
           :rabbit_virtual_host   => '/',
+          :tenant_network_type   => 'gre',
+          :network_vlan_ranges   => 'physnet1:1000:2000',
+          :ovs_enable_tunneling  => true,
           :ovs_local_ip          => '10.0.0.3',
           :bridge_uplinks        => ["br-ex:eth_27"],
           :bridge_mappings       => ["default:br-ex"],
