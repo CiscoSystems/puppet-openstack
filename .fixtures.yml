@@ -13,11 +13,15 @@ fixtures:
     "concat": "git://github.com/ripienaar/puppet-concat.git"
     "firewall": "git://github.com/puppetlabs/puppetlabs-firewall.git"
     "mysql": "git://github.com/puppetlabs/puppetlabs-mysql.git"
-    "rabbitmq": "git://github.com/puppetlabs/puppetlabs-rabbitmq"
+    "rabbitmq":
+      repo: "git://github.com/puppetlabs/puppetlabs-rabbitmq"
+      ref: 43a000b95b13c62e4fbea14e31bc61929bda1b23
     'memcached': 'git://github.com/saz/puppet-memcached'
     "stdlib": "git://github.com/puppetlabs/puppetlabs-stdlib.git"
     "sysctl": "git://github.com/duritong/puppet-sysctl.git"
     'inifile':  'git://github.com/cprice-puppet/puppetlabs-inifile'
     'vswitch': 'git://github.com/bodepd/puppet-vswitch'
+    'tempest': 'git://github.com/stackforge/puppet-tempest'
+    'vcsrepo': 'git://github.com/puppetlabs/puppetlabs-vcsrepo'
   symlinks:
     "openstack": "#{source_dir}"
