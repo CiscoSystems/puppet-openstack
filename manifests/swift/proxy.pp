@@ -4,6 +4,7 @@ class openstack::swift::proxy (
   $swift_user_password              = 'swift_pass',
   $swift_hash_suffix                = 'swift_secret',
   $swift_local_net_ip               = $::ipaddress_eth0,
+  $swift_proxy_net_ip               = $::ipaddress_eth0,
   $ring_part_power                  = 18,
   $ring_replicas                    = 3,
   $ring_min_part_hours              = 1,
@@ -20,7 +21,9 @@ class openstack::swift::proxy (
   $package_ensure                   = 'present',
   $controller_node_address          = '10.0.0.1',
   $keystone_host                    = '10.0.0.1',
-  $memcached                        = true
+  $memcached                        = true,
+  $swift_memcache_servers           = ['127.0.0.1:11211'],
+  $memcached_listen_ip              = '127.0.0.1'
 ) {
 
   if $controller_node_address !='10.0.0.1' {
@@ -36,12 +39,12 @@ class openstack::swift::proxy (
 
   if $memcached {
     class { 'memcached':
-      listen_ip => '127.0.0.1',
+      listen_ip => $memcached_listen_ip,
     }
   }
 
   class { '::swift::proxy':
-    proxy_local_net_ip       => $swift_local_net_ip,
+    proxy_local_net_ip       => $swift_proxy_net_ip,
     pipeline                 => $proxy_pipeline,
     port                     => $proxy_port,
     workers                  => $proxy_workers,
@@ -55,9 +58,12 @@ class openstack::swift::proxy (
   class { [
     '::swift::proxy::catch_errors',
     '::swift::proxy::healthcheck',
-    '::swift::proxy::cache',
     '::swift::proxy::swift3',
   ]: }
+
+  class { 'swift::proxy::cache':
+    memcache_servers => $swift_memcache_servers,
+  }
 
   class { '::swift::proxy::ratelimit':
     clock_accuracy         => $ratelimit_clock_accuracy,
