@@ -5,6 +5,7 @@
 #
 # [public_interface] Public interface used to route public traffic. Required.
 # [public_address] Public address for public endpoints. Required.
+# [public_protocol] Protocol used by public endpoints. Defaults to 'http'
 # [private_interface] Interface used for vm networking connectivity. Required.
 # [internal_address] Internal address used for management. Required.
 # [mysql_root_password] Root password for mysql server.
@@ -164,6 +165,7 @@ class openstack::controller (
   $keystone_admin_tenant   = 'admin',
   $keystone_bind_address   = '0.0.0.0',
   $region                  = 'RegionOne',
+  $public_protocol         = 'http',
   # Glance
   $glance_registry_host    = '0.0.0.0',
   $glance_db_user          = 'glance',
@@ -307,33 +309,44 @@ class openstack::controller (
 
   ####### KEYSTONE ###########
   class { 'openstack::keystone':
-    debug                 => $debug,
-    verbose               => $verbose,
-    db_type               => $db_type,
-    db_host               => $db_host,
-    db_password           => $keystone_db_password,
-    db_name               => $keystone_db_dbname,
-    db_user               => $keystone_db_user,
-    idle_timeout          => $sql_idle_timeout,
-    admin_token           => $keystone_admin_token,
-    admin_tenant          => $keystone_admin_tenant,
-    admin_email           => $admin_email,
-    admin_password        => $admin_password,
-    public_address        => $public_address,
-    internal_address      => $internal_address_real,
-    admin_address         => $admin_address_real,
-    region                => $region,
-    glance_user_password  => $glance_user_password,
-    nova_user_password    => $nova_user_password,
-    cinder                => $cinder,
-    cinder_user_password  => $cinder_user_password,
-    quantum               => $quantum,
-    quantum_user_password => $quantum_user_password,
-    swift                 => $swift,
-    swift_user_password   => $swift_user_password,
-    swift_public_address  => $swift_public_address,
-    enabled               => $enabled,
-    bind_host             => $keystone_bind_address,
+    debug                     => $debug,
+    verbose                   => $verbose,
+    db_type                   => $db_type,
+    db_host                   => $db_host,
+    db_password               => $keystone_db_password,
+    db_name                   => $keystone_db_dbname,
+    db_user                   => $keystone_db_user,
+    idle_timeout              => $sql_idle_timeout,
+    admin_token               => $keystone_admin_token,
+    admin_tenant              => $keystone_admin_tenant,
+    admin_email               => $admin_email,
+    admin_password            => $admin_password,
+    public_address            => $public_address,
+    public_protocol           => $public_protocol,
+    internal_address          => $internal_address_real,
+    admin_address             => $admin_address_real,
+    region                    => $region,
+    glance_user_password      => $glance_user_password,
+    glance_internal_address   => $internal_address_real,
+    glance_admin_address      => $admin_address_real,
+    nova_user_password        => $nova_user_password,
+    nova_internal_address     => $internal_address_real,
+    nova_admin_address        => $admin_address_real,
+    cinder                    => $cinder,
+    cinder_user_password      => $cinder_user_password,
+    cinder_internal_address   => $internal_address_real,
+    cinder_admin_address      => $admin_address_real,
+    quantum                   => $quantum,
+    quantum_user_password     => $quantum_user_password,
+    quantum_internal_address  => $internal_address_real,
+    quantum_admin_address     => $admin_address_real,
+    swift                     => $swift,
+    swift_user_password       => $swift_user_password,
+    swift_public_address      => $swift_public_address,
+    swift_internal_address    => $internal_address_real,
+    swift_admin_address       => $admin_address_real,
+    enabled                   => $enabled,
+    bind_host                 => $keystone_bind_address,
   }
 
 
