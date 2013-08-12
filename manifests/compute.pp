@@ -68,6 +68,7 @@ class openstack::compute (
   $nova_admin_user               = 'nova',
   $purge_nova_config             = false,
   $libvirt_vif_driver            = 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver',
+  $force_config_drive		 = true,
   # Rabbit
   $rabbit_host                   = '127.0.0.1',
   $rabbit_hosts                  = false,
@@ -144,6 +145,7 @@ class openstack::compute (
     vnc_enabled                   => $vnc_enabled,
     vncserver_proxyclient_address => $internal_address,
     vncproxy_host                 => $vncproxy_host,
+    force_config_drive		  => $force_config_drive,
   }
 
   # Configure libvirt for nova-compute
