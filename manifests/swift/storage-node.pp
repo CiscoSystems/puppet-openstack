@@ -50,7 +50,7 @@ class openstack::swift::storage-node (
 
   # collect resources for synchronizing the ring databases
   swift::ringsync{['account','container','object']:
-    ringserver => $ring_server,
+    ring_server => $ring_server,
   }  
 
 }
