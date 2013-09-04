@@ -48,7 +48,7 @@ class openstack::swift::storage-node (
     weight             => $storage_weight,
   }
 
-  # collect resources for synchronizing the ring databases
+  # rsync rings from the ring server
   swift::ringsync{['account','container','object']:
     ring_server => $ring_server,
   }  
