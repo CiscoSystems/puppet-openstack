@@ -390,8 +390,6 @@ class openstack::controller (
     rbd_store_user   => $glance_rbd_store_user,
     rbd_store_pool   => $glance_rbd_store_pool,
     enabled          => $enabled,
-    rbd_store_user   => $rbd_store_user,
-    rbd_store_pool   => $rbd_store_pool,
   }
 
   ######## BEGIN NOVA ###########
