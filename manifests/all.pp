@@ -147,6 +147,9 @@ class openstack::all (
   # Glance Swift Backend
   $swift_store_user        = 'swift_store_user',
   $swift_store_key         = 'swift_store_key',
+  # Glance RBD Backend
+  $glance_rbd_user         = 'images',
+  $glance_rbd_pool         = 'images',
   # Nova
   $nova_admin_tenant_name  = 'services',
   $nova_admin_user         = 'nova',
@@ -193,6 +196,10 @@ class openstack::all (
   $setup_test_volume       = false,
   $volume_group            = 'cinder-volumes',
   $iscsi_ip_address        = '127.0.0.1',
+  $cinder_volume_driver    = 'iscsi',
+  $cinder_rbd_user         = 'volumes',
+  $cinder_rbd_pool         = 'volumes',
+  $cinder_rbd_secret_uuid  = false,
   # Quantum
   $quantum                 = true,
   $bridge_interface        = undef,
@@ -329,6 +336,8 @@ class openstack::all (
     backend          => $glance_backend,
     swift_store_user => $swift_store_user,
     swift_store_key  => $swift_store_key,
+    rbd_store_user   => $glance_rbd_user,
+    rbd_store_pool   => $glance_rbd_pool,
     enabled          => $enabled,
   }
 
@@ -508,6 +517,10 @@ class openstack::all (
       db_type            => $db_type,
       db_host            => $db_host,
       iscsi_ip_address   => $iscsi_ip_address,
+      volume_driver      => $cinder_volume_driver,
+      rbd_user           => $cinder_rbd_user,
+      rbd_pool           => $cinder_rbd_pool,
+      rbd_secret_uuid    => $cinder_rbd_secret_uuid,
       setup_test_volume  => $setup_test_volume,
       manage_volumes     => $manage_volumes,
       volume_group       => $volume_group,
