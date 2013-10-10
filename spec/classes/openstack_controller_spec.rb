@@ -17,12 +17,14 @@ describe 'openstack::controller' do
       :keystone_db_password    => 'keystone_pass',
       :keystone_admin_token    => 'keystone_admin_token',
       :keystone_token_driver   => 'keystone.token.backends.kvs.Token',
+      :keystone_host           => '127.0.0.1',
       :glance_registry_host    => '0.0.0.0',
       :glance_db_password      => 'glance_pass',
       :glance_user_password    => 'glance_pass',
       :nova_bind_address       => '0.0.0.0',
       :nova_db_password        => 'nova_pass',
       :nova_user_password      => 'nova_pass',
+      :nova_memcached_servers  => false,
       :cinder_db_password      => 'cinder_pass',
       :cinder_user_password    => 'cinder_pass',
       :secret_key              => 'secret_key',
@@ -465,7 +467,8 @@ describe 'openstack::controller' do
           :image_service       => 'nova.image.glance.GlanceImageService',
           :glance_api_servers  => '10.0.0.1:9292',
           :debug               => false,
-          :verbose             => false
+          :verbose             => false,
+          :memcached_servers   => false
         )
         should contain_class('nova::api').with(
           :enabled           => true,
@@ -473,6 +476,7 @@ describe 'openstack::controller' do
           :admin_user        => 'nova',
           :admin_password    => 'nova_pass',
           :enabled_apis      => 'ec2,osapi_compute,metadata',
+          :auth_host         => '127.0.0.1',
           :api_bind_address  => '0.0.0.0'
         )
         should contain_class('nova::cert').with(:enabled => true)
@@ -528,7 +532,8 @@ describe 'openstack::controller' do
         :secret_key        => 'secret_key',
         :cache_server_ip   => '127.0.0.1',
         :cache_server_port => '11211',
-        :horizon_app_links => false
+        :horizon_app_links => false,
+        :keystone_host     => '127.0.0.1'
       )
     end
 
