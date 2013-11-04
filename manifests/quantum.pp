@@ -197,6 +197,7 @@ class openstack::quantum (
   $verbose                = false,
   $debug                  = false,
   $allow_overlapping_ips  = false,
+  $dhcp_lease_time        = $dhcp_lease_time
 ) {
 
   class { '::quantum':
@@ -248,6 +249,7 @@ class openstack::quantum (
     class { 'quantum::agents::dhcp':
       use_namespaces => true,
       debug          => $debug,
+      dhcp_lease_time => $dhcp_lease_time,
     }
   }
   if $enable_l3_agent {
