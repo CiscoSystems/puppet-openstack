@@ -196,19 +196,21 @@ class openstack::quantum (
   $keystone_host          = '127.0.0.1',
   $verbose                = false,
   $debug                  = false,
+  $allow_overlapping_ips  = false,
 ) {
 
   class { '::quantum':
-    enabled             => $enabled,
-    core_plugin         => $core_plugin,
-    bind_host           => $bind_address,
-    rabbit_host         => $rabbit_host,
-    rabbit_hosts        => $rabbit_hosts,
-    rabbit_virtual_host => $rabbit_virtual_host,
-    rabbit_user         => $rabbit_user,
-    rabbit_password     => $rabbit_password,
-    verbose             => $verbose,
-    debug               => $debug,
+    enabled               => $enabled,
+    core_plugin           => $core_plugin,
+    bind_host             => $bind_address,
+    rabbit_host           => $rabbit_host,
+    rabbit_hosts          => $rabbit_hosts,
+    rabbit_virtual_host   => $rabbit_virtual_host,
+    rabbit_user           => $rabbit_user,
+    rabbit_password       => $rabbit_password,
+    verbose               => $verbose,
+    debug                 => $debug,
+    allow_overlapping_ips => $allow_overlapping_ips,
   }
 
   if $enable_server {
