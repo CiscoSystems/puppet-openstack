@@ -38,8 +38,10 @@ class openstack::swift::proxy (
   }
 
   if $memcached {
-    class { 'memcached':
-      listen_ip => $memcached_listen_ip,
+    if ! defined(Class['memcached']) {
+      class { 'memcached':
+        listen_ip => $memcached_listen_ip,
+      }
     }
   }
 
