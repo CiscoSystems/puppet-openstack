@@ -85,7 +85,7 @@ class openstack::compute (
   # Glance
   $glance_api_servers            = false,
   # Virtualization
-  $libvirt_type                  = 'kvm',
+  $libvirt_virt_type             = 'kvm',
   # VNC
   $vnc_enabled                   = true,
   $vncproxy_host                 = undef,
@@ -163,7 +163,7 @@ class openstack::compute (
 
   # Configure libvirt for nova-compute
   class { 'nova::compute::libvirt':
-    libvirt_type      => $libvirt_type,
+    libvirt_virt_type => $libvirt_virt_type,
     vncserver_listen  => $vncserver_listen_real,
     migration_support => $migration_support,
   }

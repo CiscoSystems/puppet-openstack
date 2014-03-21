@@ -162,7 +162,7 @@ class openstack::all (
   $enabled_apis            = 'ec2,osapi_compute,metadata',
   $force_config_drive      = false,
   # Virtualization
-  $libvirt_type            = 'kvm',
+  $libvirt_virt_type       = 'kvm',
   $migration_support       = false,
   # Nova Networking
   $private_interface       = false,
@@ -371,7 +371,7 @@ class openstack::all (
 
   # Configure libvirt for nova-compute
   class { 'nova::compute::libvirt':
-    libvirt_type      => $libvirt_type,
+    libvirt_virt_type => $libvirt_virt_type,
     vncserver_listen  => $vncserver_listen_real,
     migration_support => $migration_support,
   }

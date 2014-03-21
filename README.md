@@ -105,11 +105,11 @@ Every node that is configured to be a cinder volume service must have a volume g
 ### Compute nodes
 
 * Compute nodes should be deployed onto physical hardware.
-* If compute nodes are deployed on virtual machines for testing, the `libvirt_type` parameter for the `openstack::compute` class should probably be configured as `qemu`.  This is because most virtualization technologies do not pass the virtualization CPU extensions through to their virtual machines.
+* If compute nodes are deployed on virtual machines for testing, the `libvirt_virt_type` parameter for the `openstack::compute` class should probably be configured as `qemu`.  This is because most virtualization technologies do not pass the virtualization CPU extensions through to their virtual machines.
 
 ```puppet
 class { 'openstack::compute':
-  libvirt_type => 'qemu'
+  libvirt_virt_type => 'qemu'
 }
 ```
 
@@ -117,7 +117,7 @@ class { 'openstack::compute':
 
 ```puppet
 class { 'openstack::all':
-  libvirt_type => 'qemu'
+  libvirt_virt_type => 'qemu'
 }
 ```
 
@@ -150,7 +150,7 @@ class { 'openstack::all':
   glance_db_password   => 'glance_db_password',
   rabbit_password      => 'rabbit_password',
   rabbit_user          => 'rabbit_user',
-  libvirt_type         => 'kvm',
+  libvirt_virt_type    => 'kvm',
   fixed_range          => '10.0.0.0/24',
   secret_key           => '12345',
   neutron              => false,
@@ -221,7 +221,7 @@ The `openstack::compute` class deploys the following services:
 class { 'openstack::compute':
   private_interface  => 'eth1',
   internal_address   => $::ipaddress_eth0,
-  libvirt_type       => 'kvm',
+  libvirt_virt_type  => 'kvm',
   fixed_range        => '10.0.0.0/24',
   network_manager    => 'nova.network.manager.FlatDHCPManager',
   multi_host         => false,
