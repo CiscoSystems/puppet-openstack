@@ -52,8 +52,8 @@ describe 'openstack::compute' do
         :force_config_drive             => false
       )
       should contain_class('nova::compute::libvirt').with(
-        :libvirt_type     => 'kvm',
-        :vncserver_listen => '127.0.0.2'
+        :libvirt_virt_type => 'kvm',
+        :vncserver_listen  => '127.0.0.2'
       )
       should contain_nova_config('DEFAULT/multi_host').with( :value => false )
       should contain_nova_config('DEFAULT/send_arp_for_ha').with( :value => false )
@@ -105,7 +105,7 @@ describe 'openstack::compute' do
         :rabbit_user         => 'my_rabbit_user',
         :rabbit_virtual_host => '/foo',
         :glance_api_servers  => ['controller:9292'],
-        :libvirt_type        => 'qemu',
+        :libvirt_virt_type   => 'qemu',
         :vncproxy_host       => '127.0.0.2',
         :vnc_enabled         => false,
         :force_config_drive  => true,
@@ -132,8 +132,8 @@ describe 'openstack::compute' do
         :force_config_drive             => true
       )
       should contain_class('nova::compute::libvirt').with(
-        :libvirt_type     => 'qemu',
-        :vncserver_listen => '127.0.0.1'
+        :libvirt_virt_type => 'qemu',
+        :vncserver_listen  => '127.0.0.1'
       )
       should contain_nova_config('DEFAULT/multi_host').with( :value => false )
       should contain_nova_config('DEFAULT/send_arp_for_ha').with( :value => false )

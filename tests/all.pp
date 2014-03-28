@@ -7,7 +7,7 @@ class { 'openstack::all':
   glance_user_password => 'password',
   keystone_admin_token => '12345',
   keystone_db_password => 'password',
-  libvirt_type         => 'qemu',
+  libvirt_virt_type    => 'qemu',
   mysql_root_password  => 'password',
   nova_db_password     => 'password',
   nova_user_password   => 'password',
